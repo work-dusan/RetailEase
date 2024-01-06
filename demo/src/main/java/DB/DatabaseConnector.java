@@ -1,5 +1,7 @@
 package DB;
 
+import users.Customer;
+
 import java.sql.*;
 
 public class DatabaseConnector {
@@ -49,6 +51,59 @@ public class DatabaseConnector {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public static void insertCustomer(Customer customer, String password) {
+        String insertUserQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+        String insertCustomerQuery = "INSERT INTO customer (username, email, street_name, street_number, city, phone_number) VALUES (?, ?, ?, ?, ?, ?)";
+
+        Connection connection = null;
+
+        try {
+            connection = connect();
+            connection.setAutoCommit(false);
+
+            // Unos podataka u tabelu users
+            try (PreparedStatement userStatement = connection.prepareStatement(insertUserQuery)) {
+                userStatement.setString(1, customer.getUsername());
+                userStatement.setString(2, password);
+                userStatement.setString(3, "Customer");
+                userStatement.executeUpdate();
+            }
+
+            // Unos podataka u tabelu customer
+            try (PreparedStatement customerStatement = connection.prepareStatement(insertCustomerQuery)) {
+                customerStatement.setString(1, customer.getUsername());
+                customerStatement.setString(2, customer.getEmail());
+                customerStatement.setString(3, customer.getStreetName());
+                customerStatement.setString(4, customer.getStreetNumber());
+                customerStatement.setString(5, customer.getCity());
+                customerStatement.setString(6, customer.getPhoneNumber());
+
+                customerStatement.executeUpdate();
+            }
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.setAutoCommit(true);
+                    disconnect(connection);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

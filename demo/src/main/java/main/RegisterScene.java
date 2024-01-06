@@ -72,8 +72,12 @@ public class RegisterScene {
 
         registerButton.setOnAction(e -> {
             String username = usernameInput.getText();
+            String role = roleChoiceBox.getValue();
             if (!DatabaseConnector.userExists(username)) {
-                System.out.println("Registracija uspešna!");
+                if (role.equals("Customer")) {
+                    CustomerRegistrationScene customerRegistrationScene = new CustomerRegistrationScene();
+                    primaryStage.setScene(customerRegistrationScene.createCustomerRegistrationScene(primaryStage, username, passwordInput.getText()));
+                }
             } else {
                 showAlert("Error", "Username already exists. Please choose another username.");
             }
