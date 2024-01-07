@@ -4,10 +4,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CustomerValidations {
+
+    private static final String NAME_REGEX = "^[a-zA-Z]+(?:[\\s-][a-zA-Z]+)*$";
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
     private static final String STREET_NAME_REGEX = "^[a-zA-Z]+(?:[\\s-][a-zA-Z]+)*$";
     private static final String STREET_NUMBER_REGEX = "^\\d+[a-zA-Z]*$";
     private static final String PHONE_NUMBER_REGEX = "^\\d{10}$";
+
+    public static boolean validateName(String name){
+        Pattern pattern = Pattern.compile(NAME_REGEX);
+        Matcher matcher = pattern.matcher(name);
+        return matcher.matches();
+    }
 
     public static boolean validateEmail(String email) {
         Pattern pattern = Pattern.compile(EMAIL_REGEX);

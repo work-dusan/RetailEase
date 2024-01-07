@@ -19,29 +19,43 @@ public class CustomerRegistrationScene {
         grid.setVgap(10);
         grid.setHgap(10);
 
+        Label firstNameLabel = new Label("First Name:");
+        GridPane.setConstraints(firstNameLabel, 0, 0);
+
+        TextField firstNameInput = new TextField();
+        firstNameInput.setPromptText("Enter your first name");
+        GridPane.setConstraints(firstNameInput, 1, 0);
+
+        Label lastNameLabel = new Label("Last Name:");
+        GridPane.setConstraints(lastNameLabel, 0, 1);
+
+        TextField lastNameInput = new TextField();
+        lastNameInput.setPromptText("Enter your last name");
+        GridPane.setConstraints(lastNameInput, 1, 1);
+
         Label emailLabel = new Label("Email:");
-        GridPane.setConstraints(emailLabel, 0, 0);
+        GridPane.setConstraints(emailLabel, 0, 2);
 
         TextField emailInput = new TextField();
         emailInput.setPromptText("Enter your email");
-        GridPane.setConstraints(emailInput, 1, 0);
+        GridPane.setConstraints(emailInput, 1, 2);
 
         Label streetLabel = new Label("Street:");
-        GridPane.setConstraints(streetLabel, 0, 1);
+        GridPane.setConstraints(streetLabel, 0, 3);
 
         TextField streetInput = new TextField();
         streetInput.setPromptText("Enter your street");
-        GridPane.setConstraints(streetInput, 1, 1);
+        GridPane.setConstraints(streetInput, 1, 3);
 
         Label numberLabel = new Label("Number:");
-        GridPane.setConstraints(numberLabel, 0, 2);
+        GridPane.setConstraints(numberLabel, 0, 4);
 
         TextField numberInput = new TextField();
         numberInput.setPromptText("Enter your street number");
-        GridPane.setConstraints(numberInput, 1, 2);
+        GridPane.setConstraints(numberInput, 1, 4);
 
         Label cityLabel = new Label("City:");
-        GridPane.setConstraints(cityLabel, 0, 3);
+        GridPane.setConstraints(cityLabel, 0, 5);
 
         // ChoiceBox za odabir grada
         ObservableList<String> cities = FXCollections.observableArrayList(
@@ -49,20 +63,22 @@ public class CustomerRegistrationScene {
                 // Dodajte ostale gradove prema potrebi
         );
         ChoiceBox<String> cityChoiceBox = new ChoiceBox<>(cities);
-        GridPane.setConstraints(cityChoiceBox, 1, 3);
+        GridPane.setConstraints(cityChoiceBox, 1, 5);
 
         Label phoneLabel = new Label("Phone Number:");
-        GridPane.setConstraints(phoneLabel, 0, 4);
+        GridPane.setConstraints(phoneLabel, 0, 6);
 
         TextField phoneInput = new TextField();
         phoneInput.setPromptText("Enter your phone number");
-        GridPane.setConstraints(phoneInput, 1, 4);
+        GridPane.setConstraints(phoneInput, 1, 6);
 
         Button registerButton = new Button("Complete Registration");
-        GridPane.setConstraints(registerButton, 1, 5);
+        GridPane.setConstraints(registerButton, 1, 7);
 
         // Dodajte logiku za registraciju kupca kada se pritisne dugme
         registerButton.setOnAction(e -> {
+            String firstName = firstNameInput.getText();
+            String lastName = lastNameInput.getText();
             String email = emailInput.getText();
             String streetName = streetInput.getText();
             String streetNumber = numberInput.getText();
@@ -71,13 +87,15 @@ public class CustomerRegistrationScene {
             if (CustomerValidations.validateEmail(email) &&
                     CustomerValidations.validateStreetName(streetName) &&
                     CustomerValidations.validateStreetNumber(streetNumber) &&
-                    CustomerValidations.validatePhoneNumber(phoneNumber)) {
+                    CustomerValidations.validatePhoneNumber(phoneNumber) &&
+                    CustomerValidations.validateName(firstName) &&
+                    CustomerValidations.validateName(lastName)) {
 
-                    Customer newCustomer = new Customer(username, email, streetName, streetNumber, cityChoiceBox.getValue(), phoneNumber);
-                    DatabaseConnector.insertCustomer(newCustomer, password);
+                Customer newCustomer = new Customer(username, firstName, lastName, email, streetName, streetNumber, cityChoiceBox.getValue(), phoneNumber);
+                DatabaseConnector.insertCustomer(newCustomer, password);
 
-                    LoginScene loginScene = new LoginScene();
-                    primaryStage.setScene(loginScene.createLoginScene(primaryStage));
+                LoginScene loginScene = new LoginScene();
+                primaryStage.setScene(loginScene.createLoginScene(primaryStage));
             } else {
                 String errorMessage = "Invalid data. Please check your input.";
                 showErrorDialog(errorMessage);
@@ -85,9 +103,9 @@ public class CustomerRegistrationScene {
 
         });
 
-        grid.getChildren().addAll(emailLabel, emailInput, streetLabel, streetInput, numberLabel, numberInput, cityLabel, cityChoiceBox, phoneLabel, phoneInput, registerButton);
+        grid.getChildren().addAll(firstNameLabel, firstNameInput, lastNameLabel, lastNameInput, emailLabel, emailInput, streetLabel, streetInput, numberLabel, numberInput, cityLabel, cityChoiceBox, phoneLabel, phoneInput, registerButton);
 
-        return new Scene(grid, 400, 300);
+        return new Scene(grid, 400, 400);
     }
 
     private void showErrorDialog(String message) {

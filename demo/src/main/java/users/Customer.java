@@ -5,15 +5,24 @@ import validations.CustomerValidations;
 public class Customer {
 
     private String username;
+    private String firstName;
+    private String lastName;
     private String email;
     private String streetName;
     private String streetNumber;
     private String city;
     private String phoneNumber;
 
-    public Customer(String username, String email, String streetName, String streetNumber, String city, String phoneNumber) throws IllegalArgumentException {
-        if (CustomerValidations.validateEmail(email) && CustomerValidations.validateStreetName(streetName) && CustomerValidations.validateStreetNumber(streetNumber) && CustomerValidations.validatePhoneNumber(phoneNumber)) {
+    public Customer(String username, String firstName, String lastName, String email, String streetName, String streetNumber, String city, String phoneNumber) throws IllegalArgumentException {
+        if (CustomerValidations.validateEmail(email) &&
+                CustomerValidations.validateStreetName(streetName) &&
+                CustomerValidations.validateStreetNumber(streetNumber) &&
+                CustomerValidations.validatePhoneNumber(phoneNumber) &&
+                CustomerValidations.validateName(firstName) &&
+                CustomerValidations.validateName(lastName)) {
             this.username = username;
+            this.firstName = firstName;
+            this.lastName = lastName;
             this.email = email;
             this.streetName = streetName;
             this.streetNumber = streetNumber;
@@ -21,6 +30,30 @@ public class Customer {
             this.phoneNumber = phoneNumber;
         } else {
             throw new IllegalArgumentException("Invalid data provided for customer registration");
+        }
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        if (CustomerValidations.validateName(firstName)){
+            this.firstName = firstName;
+        } else {
+            throw new IllegalArgumentException("Invalid first name format");
+        }
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        if (CustomerValidations.validateName(lastName)){
+            this.lastName = lastName;
+        } else {
+            throw new IllegalArgumentException("Invalid last name format");
         }
     }
 
@@ -92,6 +125,8 @@ public class Customer {
     public String toString() {
         return "Customer{" +
                 "username='" + username + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", streetName='" + streetName + '\'' +
                 ", streetNumber='" + streetNumber + '\'' +
@@ -99,6 +134,7 @@ public class Customer {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 '}';
     }
-
-
 }
+
+
+

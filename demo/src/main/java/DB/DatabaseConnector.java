@@ -56,7 +56,7 @@ public class DatabaseConnector {
 
     public static void insertCustomer(Customer customer, String password) {
         String insertUserQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
-        String insertCustomerQuery = "INSERT INTO customer (username, email, street_name, street_number, city, phone_number) VALUES (?, ?, ?, ?, ?, ?)";
+        String insertCustomerQuery = "INSERT INTO customer (username, first_name, last_name, email, street_name, street_number, city, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection connection = null;
 
@@ -75,11 +75,13 @@ public class DatabaseConnector {
             // Unos podataka u tabelu customer
             try (PreparedStatement customerStatement = connection.prepareStatement(insertCustomerQuery)) {
                 customerStatement.setString(1, customer.getUsername());
-                customerStatement.setString(2, customer.getEmail());
-                customerStatement.setString(3, customer.getStreetName());
-                customerStatement.setString(4, customer.getStreetNumber());
-                customerStatement.setString(5, customer.getCity());
-                customerStatement.setString(6, customer.getPhoneNumber());
+                customerStatement.setString(2, customer.getFirstName());
+                customerStatement.setString(3, customer.getLastName());
+                customerStatement.setString(4, customer.getEmail());
+                customerStatement.setString(5, customer.getStreetName());
+                customerStatement.setString(6, customer.getStreetNumber());
+                customerStatement.setString(7, customer.getCity());
+                customerStatement.setString(8, customer.getPhoneNumber());
 
                 customerStatement.executeUpdate();
             }
