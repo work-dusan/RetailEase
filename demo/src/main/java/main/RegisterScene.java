@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import validations.CashierValidations;
 
 public class RegisterScene {
 
@@ -77,6 +78,9 @@ public class RegisterScene {
                 if (role.equals("Customer")) {
                     CustomerRegistrationScene customerRegistrationScene = new CustomerRegistrationScene();
                     primaryStage.setScene(customerRegistrationScene.createCustomerRegistrationScene(primaryStage, username, passwordInput.getText()));
+                } else if (role.equals("Cashier")) {
+                    CashierRegistrationScene cashierRegistrationScene = new CashierRegistrationScene();
+                    primaryStage.setScene(cashierRegistrationScene.createCashierRegistrationScene(primaryStage, username, passwordInput.getText()));
                 }
             } else {
                 showAlert("Error", "Username already exists. Please choose another username.");

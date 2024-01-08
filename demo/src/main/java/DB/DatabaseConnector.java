@@ -1,5 +1,6 @@
 package DB;
 
+import users.Cashier;
 import users.Customer;
 
 import java.sql.*;
@@ -108,4 +109,60 @@ public class DatabaseConnector {
             }
         }
     }
+    public static void insertCashier(Cashier cashier, String password) {
+        String insertUserQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+        String insertCashierQuery = "INSERT INTO cashier (username, first_name, last_name, jmbg, date_of_birth, address, phone_number, employment_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        Connection connection = null;
+
+        try {
+            connection = connect();
+            connection.setAutoCommit(false);
+
+            // Unos podataka u tabelu users
+            try (PreparedStatement userStatement = connection.prepareStatement(insertUserQuery)) {
+                userStatement.setString(1, cashier.getUsername());
+                // Ovde postavite šifrovanu verziju lozinke (npr. sa bcrypt)
+                userStatement.setString(2, password);
+                userStatement.setString(3, "Cashier");
+                userStatement.executeUpdate();
+            }
+
+            // Unos podataka u tabelu cashier
+            try (PreparedStatement cashierStatement = connection.prepareStatement(insertCashierQuery)) {
+                cashierStatement.setString(1, cashier.getUsername());
+                cashierStatement.setString(2, cashier.getFirstName());
+                cashierStatement.setString(3, cashier.getLastName());
+                cashierStatement.setString(4, cashier.getJmbg());
+                cashierStatement.setDate(5, java.sql.Date.valueOf(cashier.getDateOfBirth()));
+                cashierStatement.setString(6, cashier.getAddress());
+                cashierStatement.setString(7, cashier.getPhoneNumber());
+                cashierStatement.setDate(8, java.sql.Date.valueOf(cashier.getEmploymentDate()));
+
+                cashierStatement.executeUpdate();
+            }
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.setAutoCommit(true);
+                    disconnect(connection);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
