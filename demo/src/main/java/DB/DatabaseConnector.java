@@ -2,6 +2,7 @@ package DB;
 
 import users.Cashier;
 import users.Customer;
+import users.WarehouseEmployee;
 
 import java.sql.*;
 
@@ -140,6 +141,62 @@ public class DatabaseConnector {
                 cashierStatement.setDate(8, java.sql.Date.valueOf(cashier.getEmploymentDate()));
 
                 cashierStatement.executeUpdate();
+            }
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.setAutoCommit(true);
+                    disconnect(connection);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public static void insertWarehouseEmployee(WarehouseEmployee warehouseEmployee, String password) {
+        String insertUserQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+        String insertWarehouseEmployeeQuery = "INSERT INTO WarehouseEmployee (username, first_name, last_name, jmbg, date_of_birth, address, phone_number, employment_date, responsibility, access_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        Connection connection = null;
+
+        try {
+            connection = connect();
+            connection.setAutoCommit(false);
+
+            // Unos podataka u tabelu users
+            try (PreparedStatement userStatement = connection.prepareStatement(insertUserQuery)) {
+                userStatement.setString(1, warehouseEmployee.getUsername());
+                userStatement.setString(2, password);
+                userStatement.setString(3, "WarehouseEmployee");
+                userStatement.executeUpdate();
+            }
+
+            // Unos podataka u tabelu WarehouseEmployee
+            try (PreparedStatement warehouseEmployeeStatement = connection.prepareStatement(insertWarehouseEmployeeQuery)) {
+                warehouseEmployeeStatement.setString(1, warehouseEmployee.getUsername());
+                warehouseEmployeeStatement.setString(2, warehouseEmployee.getFirstName());
+                warehouseEmployeeStatement.setString(3, warehouseEmployee.getLastName());
+                warehouseEmployeeStatement.setString(4, warehouseEmployee.getJmbg());
+                warehouseEmployeeStatement.setDate(5, java.sql.Date.valueOf(warehouseEmployee.getDateOfBirth()));
+                warehouseEmployeeStatement.setString(6, warehouseEmployee.getAddress());
+                warehouseEmployeeStatement.setString(7, warehouseEmployee.getPhoneNumber());
+                warehouseEmployeeStatement.setDate(8, java.sql.Date.valueOf(warehouseEmployee.getEmploymentDate()));
+                warehouseEmployeeStatement.setString(9, warehouseEmployee.getResponsibility());
+                warehouseEmployeeStatement.setString(10, warehouseEmployee.getAccessLevel());
+
+                warehouseEmployeeStatement.executeUpdate();
             }
 
             connection.commit();

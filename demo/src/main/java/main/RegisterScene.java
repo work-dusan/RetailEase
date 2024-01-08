@@ -47,7 +47,7 @@ public class RegisterScene {
         GridPane.setConstraints(roleLabel, 0, 3);
 
         roleChoiceBox = new ChoiceBox<>();
-        roleChoiceBox.getItems().addAll("Cashier", "Customer", "Storekeeper", "Delivery Person");
+        roleChoiceBox.getItems().addAll("Cashier", "Customer", "Warehouse", "Delivery");
         roleChoiceBox.setValue("Select Role");
         GridPane.setConstraints(roleChoiceBox, 1, 3);
 
@@ -81,6 +81,9 @@ public class RegisterScene {
                 } else if (role.equals("Cashier")) {
                     CashierRegistrationScene cashierRegistrationScene = new CashierRegistrationScene();
                     primaryStage.setScene(cashierRegistrationScene.createCashierRegistrationScene(primaryStage, username, passwordInput.getText()));
+                } else if (role.equals("Warehouse")){
+                    WarehouseEmployeeRegistrationScene warehouseEmployeeRegistrationScene = new WarehouseEmployeeRegistrationScene();
+                    primaryStage.setScene(warehouseEmployeeRegistrationScene.createWarehouseEmployeeRegistrationScene(primaryStage, username, passwordInput.getText()));
                 }
             } else {
                 showAlert("Error", "Username already exists. Please choose another username.");
