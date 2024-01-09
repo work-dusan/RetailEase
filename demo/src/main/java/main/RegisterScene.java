@@ -84,6 +84,9 @@ public class RegisterScene {
                 } else if (role.equals("Warehouse")){
                     WarehouseEmployeeRegistrationScene warehouseEmployeeRegistrationScene = new WarehouseEmployeeRegistrationScene();
                     primaryStage.setScene(warehouseEmployeeRegistrationScene.createWarehouseEmployeeRegistrationScene(primaryStage, username, passwordInput.getText()));
+                } else {
+                    DeliveryDriverRegisterScene deliveryDriverRegisterScene = new DeliveryDriverRegisterScene();
+                    primaryStage.setScene(deliveryDriverRegisterScene.createDeliveryDriverRegisterScene(primaryStage, username, passwordInput.getText()));
                 }
             } else {
                 showAlert("Error", "Username already exists. Please choose another username.");

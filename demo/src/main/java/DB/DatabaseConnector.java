@@ -2,6 +2,7 @@ package DB;
 
 import users.Cashier;
 import users.Customer;
+import users.DeliveryDriver;
 import users.WarehouseEmployee;
 
 import java.sql.*;
@@ -197,6 +198,63 @@ public class DatabaseConnector {
                 warehouseEmployeeStatement.setString(10, warehouseEmployee.getAccessLevel());
 
                 warehouseEmployeeStatement.executeUpdate();
+            }
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.setAutoCommit(true);
+                    disconnect(connection);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public static void insertDeliveryDriver(DeliveryDriver driver, String password) {
+        String insertUserQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+        String insertDriverQuery = "INSERT INTO driver (username, first_name, last_name, jmbg, date_of_birth, " +
+                "address, phone_number, employment_date, license_number, vehicle_info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        Connection connection = null;
+
+        try {
+            connection = connect();
+            connection.setAutoCommit(false);
+
+            // Unos podataka u tabelu users
+            try (PreparedStatement userStatement = connection.prepareStatement(insertUserQuery)) {
+                userStatement.setString(1, driver.getUsername());
+                userStatement.setString(2, password);
+                userStatement.setString(3, "Driver");
+                userStatement.executeUpdate();
+            }
+
+            // Unos podataka u tabelu driver
+            try (PreparedStatement driverStatement = connection.prepareStatement(insertDriverQuery)) {
+                driverStatement.setString(1, driver.getUsername());
+                driverStatement.setString(2, driver.getFirstName());
+                driverStatement.setString(3, driver.getLastName());
+                driverStatement.setString(4, driver.getJmbg());
+                driverStatement.setDate(5, java.sql.Date.valueOf(driver.getDateOfBirth()));
+                driverStatement.setString(6, driver.getAddress());
+                driverStatement.setString(7, driver.getPhoneNumber());
+                driverStatement.setDate(8, java.sql.Date.valueOf(driver.getEmploymentDate()));
+                driverStatement.setString(9, driver.getLicenseNumber());
+                driverStatement.setString(10, driver.getVehicleInfo());
+
+                driverStatement.executeUpdate();
             }
 
             connection.commit();

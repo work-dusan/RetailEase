@@ -82,6 +82,8 @@ public class CashierRegistrationScene {
                 Cashier newCashier = new Cashier(username, firstName, lastName, jmbg, dob, address, phoneNumber, employmentDate);
                 DatabaseConnector.insertCashier(newCashier, password);
 
+                successfulDialog("Registration Successful!");
+
                 // Vratite se na ekran za prijavu nakon registracije
                 LoginScene loginScene = new LoginScene();
                 primaryStage.setScene(loginScene.createLoginScene(primaryStage));
@@ -110,6 +112,14 @@ public class CashierRegistrationScene {
     private void showErrorDialog(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void successfulDialog(String message){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Success");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

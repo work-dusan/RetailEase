@@ -94,6 +94,8 @@ public class CustomerRegistrationScene {
                 Customer newCustomer = new Customer(username, firstName, lastName, email, streetName, streetNumber, cityChoiceBox.getValue(), phoneNumber);
                 DatabaseConnector.insertCustomer(newCustomer, password);
 
+                successfulDialog("Registration Successful!");
+
                 LoginScene loginScene = new LoginScene();
                 primaryStage.setScene(loginScene.createLoginScene(primaryStage));
             } else {
@@ -111,6 +113,14 @@ public class CustomerRegistrationScene {
     private void showErrorDialog(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void successfulDialog(String message){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Success");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

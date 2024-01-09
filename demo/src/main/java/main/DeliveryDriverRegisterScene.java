@@ -8,14 +8,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import users.WarehouseEmployee;
-import validations.WarehouseValidations;
+import users.DeliveryDriver;
+import validations.DeliveryDriverValidations;
 
 import java.time.LocalDate;
 
-public class WarehouseEmployeeRegistrationScene {
+public class DeliveryDriverRegisterScene {
 
-    public Scene createWarehouseEmployeeRegistrationScene(Stage primaryStage, String username, String password) {
+    public Scene createDeliveryDriverRegisterScene(Stage primaryStage, String username, String password) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20, 20, 20, 20));
         grid.setVgap(10);
@@ -68,28 +68,24 @@ public class WarehouseEmployeeRegistrationScene {
         DatePicker employmentDatePicker = new DatePicker();
         GridPane.setConstraints(employmentDatePicker, 1, 6);
 
-        Label responsibilityLabel = new Label("Responsibility:");
-        GridPane.setConstraints(responsibilityLabel, 0, 7);
+        Label licenseNumberLabel = new Label("License Number:");
+        GridPane.setConstraints(licenseNumberLabel, 0, 7);
 
-        TextField responsibilityInput = new TextField();
-        responsibilityInput.setPromptText("Enter responsibility");
-        GridPane.setConstraints(responsibilityInput, 1, 7);
+        TextField licenseNumberInput = new TextField();
+        licenseNumberInput.setPromptText("Enter license number");
+        GridPane.setConstraints(licenseNumberInput, 1, 7);
 
-        Label accessLevelLabel = new Label("Access Level:");
-        GridPane.setConstraints(accessLevelLabel, 0, 8);
+        Label vehicleInfoLabel = new Label("Vehicle Info:");
+        GridPane.setConstraints(vehicleInfoLabel, 0, 8);
 
-        // ChoiceBox za odabir nivoa pristupa
-        ObservableList<String> accessLevels = FXCollections.observableArrayList(
-                "Low", "High"
-                // Dodajte ostale nivoe pristupa prema potrebi
-        );
-        ChoiceBox<String> accessLevelChoiceBox = new ChoiceBox<>(accessLevels);
-        GridPane.setConstraints(accessLevelChoiceBox, 1, 8);
+        TextField vehicleInfoInput = new TextField();
+        vehicleInfoInput.setPromptText("Enter vehicle info");
+        GridPane.setConstraints(vehicleInfoInput, 1, 8);
 
         Button registerButton = new Button("Complete Registration");
         GridPane.setConstraints(registerButton, 1, 9);
 
-        // Dodajte logiku za registraciju magacionera kada se pritisne dugme
+        // Dodajte logiku za registraciju dostavljača kada se pritisne dugme
         registerButton.setOnAction(e -> {
             String firstName = firstNameInput.getText();
             String lastName = lastNameInput.getText();
@@ -98,15 +94,15 @@ public class WarehouseEmployeeRegistrationScene {
             String address = addressInput.getText();
             String phoneNumber = phoneNumberInput.getText();
             LocalDate employmentDate = employmentDatePicker.getValue();
-            String responsibility = responsibilityInput.getText();
-            String accessLevel = accessLevelChoiceBox.getValue();
+            String licenseNumber = licenseNumberInput.getText();
+            String vehicleInfo = vehicleInfoInput.getText();
 
-            if (validateWarehouseEmployeeData(firstName, lastName, jmbg, dob, address, phoneNumber, employmentDate, responsibility)) {
-                WarehouseEmployee newWarehouseEmployee = new WarehouseEmployee(username, firstName, lastName, jmbg,
-                        dob, address, phoneNumber, employmentDate, responsibility, accessLevel);
-                DatabaseConnector.insertWarehouseEmployee(newWarehouseEmployee, password);
+            if (validateDeliveryDriverData(firstName, lastName, jmbg, dob, address, phoneNumber, employmentDate, licenseNumber, vehicleInfo)) {
+                DeliveryDriver newDeliveryDriver = new DeliveryDriver(username, firstName, lastName, jmbg,
+                        dob, address, phoneNumber, employmentDate, licenseNumber, vehicleInfo);
+                DatabaseConnector.insertDeliveryDriver(newDeliveryDriver, password);
 
-                successfulDialog("Registration Successful!");
+                successfulDialog("Registration Sucessful!");
 
                 // Vratite se na ekran za prijavu nakon registracije
                 LoginScene loginScene = new LoginScene();
@@ -117,29 +113,26 @@ public class WarehouseEmployeeRegistrationScene {
             }
         });
 
-        accessLevelChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            registerButton.setDisable(newValue == null);
-        });
-
         grid.getChildren().addAll(firstNameLabel, firstNameInput, lastNameLabel, lastNameInput, jmbgLabel, jmbgInput,
                 dobLabel, dobPicker, addressLabel, addressInput, phoneNumberLabel, phoneNumberInput,
-                employmentDateLabel, employmentDatePicker, responsibilityLabel, responsibilityInput,
-                accessLevelLabel, accessLevelChoiceBox, registerButton);
+                employmentDateLabel, employmentDatePicker, licenseNumberLabel, licenseNumberInput,
+                vehicleInfoLabel, vehicleInfoInput, registerButton);
 
-        return new Scene(grid, 400, 550);
+        return new Scene(grid, 400, 600);
     }
 
-    private boolean validateWarehouseEmployeeData(String firstName, String lastName, String jmbg, LocalDate dob,
-                                                  String address, String phoneNumber, LocalDate employmentDate,
-                                                  String responsibility) {
-        return WarehouseValidations.validateFirstName(firstName) &&
-                WarehouseValidations.validateLastName(lastName) &&
-                WarehouseValidations.validateJMBG(jmbg) &&
-                WarehouseValidations.validateDateOfBirth(dob) &&
-                WarehouseValidations.validateAddress(address) &&
-                WarehouseValidations.validatePhoneNumber(phoneNumber) &&
-                WarehouseValidations.validateEmploymentDate(employmentDate) &&
-                WarehouseValidations.validateResponsibility(responsibility);
+    private boolean validateDeliveryDriverData(String firstName, String lastName, String jmbg, LocalDate dob,
+                                               String address, String phoneNumber, LocalDate employmentDate,
+                                               String licenseNumber, String vehicleInfo) {
+        return DeliveryDriverValidations.validateFirstName(firstName) &&
+                DeliveryDriverValidations.validateLastName(lastName) &&
+                DeliveryDriverValidations.validateJMBG(jmbg) &&
+                DeliveryDriverValidations.validateDateOfBirth(dob) &&
+                DeliveryDriverValidations.validateAddress(address) &&
+                DeliveryDriverValidations.validatePhoneNumber(phoneNumber) &&
+                DeliveryDriverValidations.validateEmploymentDate(employmentDate) &&
+                DeliveryDriverValidations.validateLicensePlate(licenseNumber) &&
+                DeliveryDriverValidations.validateVehicleInfo(vehicleInfo);
     }
 
     private void showErrorDialog(String message) {
