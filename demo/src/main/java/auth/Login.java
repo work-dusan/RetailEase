@@ -36,14 +36,6 @@ public class Login {
             }
         }
 
-        // Primer funkcije za proveru korisničkih podataka (treba prilagoditi prema vašoj bazi podataka)
-        private static boolean checkUserCredentials(String username, String password) {
-            // Ovde treba implementirati logiku za proveru korisničkih podataka u bazi podataka
-            // Vratiti true ako su podaci tačni, inače false
-            // Ovo je samo primer, stvarna implementacija zavisi od vaše baze podataka
-            return username.equals("korisnik") && password.equals("sifra");
-        }
-
         // Metoda za prikazivanje JavaFX Alert prozora
         private static void showAlert(String title, String content) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
