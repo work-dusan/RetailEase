@@ -6,5 +6,6 @@ module com.example.demo {
 
 
     opens main to javafx.fxml;
+    opens products to javafx.base;
     exports main;
 }

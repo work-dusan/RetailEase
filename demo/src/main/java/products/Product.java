@@ -1,22 +1,22 @@
 package products;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import validations.ProductValidation;
 
 public class Product {
-    private long productId;
+    private String productId;
     private String productName;
-    private BigDecimal price;
+    private double price;
     private int quantityInStock;
     private String productType;
     private String description;
     private LocalDate expirationDate;
     private String supplier;
 
-    public Product(long productId, String productName, BigDecimal price, int quantityInStock, String productType,
+    public Product(String productId, String productName, double price, int quantityInStock, String productType,
                    String description, LocalDate expirationDate, String supplier) {
-        if (ProductValidation.validateProductName(productName) &&
+        if (ProductValidation.validateProductId(productId) &&
+                ProductValidation.validateProductName(productName) &&
                 ProductValidation.validatePrice(price) &&
                 ProductValidation.validateQuantityInStock(quantityInStock) &&
                 ProductValidation.validateProductType(productType) &&
@@ -38,12 +38,16 @@ public class Product {
 
     // Dodajte gettere i settere prema potrebi
 
-    public long getProductId() {
+    public String getProductId() {
         return productId;
     }
 
-    public void setProductId(long productId) {
-        this.productId = productId;
+    public void setProductId(String productId) {
+        if (ProductValidation.validateProductId(productId)){
+            this.productId = productId;
+        } else{
+            throw new IllegalArgumentException("Invalid product ID");
+        }
     }
 
     public String getProductName() {
@@ -58,11 +62,11 @@ public class Product {
         }
     }
 
-    public BigDecimal getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(double price) {
         if (ProductValidation.validatePrice(price)) {
             this.price = price;
         } else {

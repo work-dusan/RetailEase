@@ -45,7 +45,7 @@ public class LoginScene {
 
         // ---------------       EVENTS         -----------------------
 
-        loginButton.setOnAction(e -> Login.handleLogin(usernameInput.getText(), passwordInput.getText()));
+        loginButton.setOnAction(e -> Login.handleLogin(primaryStage, usernameInput.getText(), passwordInput.getText()));
         registerButton.setOnAction(e -> {
             RegisterScene registerScene = new RegisterScene();
             primaryStage.setScene(registerScene.createRegisterScene(primaryStage));

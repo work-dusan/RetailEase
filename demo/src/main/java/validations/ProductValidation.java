@@ -4,14 +4,18 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class ProductValidation {
+
+    public static boolean validateProductId(String productId){
+        return productId.length() == 15;
+    }
     public static boolean validateProductName(String productName) {
         // Validacija naziva proizvoda
         return productName != null && !productName.trim().isEmpty();
     }
 
-    public static boolean validatePrice(BigDecimal price) {
+    public static boolean validatePrice(double price) {
         // Validacija cene
-        return price != null && price.compareTo(BigDecimal.ZERO) >= 0;
+        return price >= 0;
     }
 
     public static boolean validateQuantityInStock(int quantityInStock) {

@@ -2,6 +2,8 @@ package auth;
 
 import DB.DatabaseConnector;
 import javafx.scene.control.Alert;
+import javafx.stage.Stage;
+import main.WarehouseEmployeeMainScene;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,7 +12,7 @@ import java.sql.SQLException;
 
 public class Login {
 
-        public static void handleLogin(String username, String password) {
+        public static void handleLogin(Stage primaryStage, String username, String password) {
             Connection connection = DatabaseConnector.connect();
 
             if (connection != null) {
@@ -22,7 +24,13 @@ public class Login {
                     ResultSet resultSet = preparedStatement.executeQuery();
 
                     if (resultSet.next()) {
+                        String role = resultSet.getString("role");
+                        System.out.println(role);
                         showAlert("Login Successful", "Welcome, " + username + "!");
+                        if (role.equals("WarehouseEmployee")){
+                            WarehouseEmployeeMainScene mainScreen = new WarehouseEmployeeMainScene();
+                            primaryStage.setScene(mainScreen.createWarehouseEmployeeMainScene(primaryStage));
+                        }
                     } else {
                         showAlert("Login Failed", "Invalid username or password.");
                     }
