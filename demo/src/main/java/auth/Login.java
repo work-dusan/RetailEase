@@ -25,7 +25,6 @@ public class Login {
 
                     if (resultSet.next()) {
                         String role = resultSet.getString("role");
-                        System.out.println(role);
                         showAlert("Login Successful", "Welcome, " + username + "!");
                         if (role.equals("WarehouseEmployee")){
                             WarehouseEmployeeMainScene mainScreen = new WarehouseEmployeeMainScene();
