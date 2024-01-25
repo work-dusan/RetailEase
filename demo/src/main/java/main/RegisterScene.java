@@ -6,7 +6,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import validations.CashierValidations;
+import encryptor.SHA256;
+
+import java.security.NoSuchAlgorithmException;
 
 public class RegisterScene {
 
@@ -74,24 +76,35 @@ public class RegisterScene {
         registerButton.setOnAction(e -> {
             String username = usernameInput.getText();
             String role = roleChoiceBox.getValue();
+            String password = passwordInput.getText();  // Originalna lozinka
+
             if (!DatabaseConnector.userExists(username)) {
-                if (role.equals("Customer")) {
-                    CustomerRegistrationScene customerRegistrationScene = new CustomerRegistrationScene();
-                    primaryStage.setScene(customerRegistrationScene.createCustomerRegistrationScene(primaryStage, username, passwordInput.getText()));
-                } else if (role.equals("Cashier")) {
-                    CashierRegistrationScene cashierRegistrationScene = new CashierRegistrationScene();
-                    primaryStage.setScene(cashierRegistrationScene.createCashierRegistrationScene(primaryStage, username, passwordInput.getText()));
-                } else if (role.equals("Warehouse")){
-                    WarehouseEmployeeRegistrationScene warehouseEmployeeRegistrationScene = new WarehouseEmployeeRegistrationScene();
-                    primaryStage.setScene(warehouseEmployeeRegistrationScene.createWarehouseEmployeeRegistrationScene(primaryStage, username, passwordInput.getText()));
-                } else {
-                    DeliveryDriverRegisterScene deliveryDriverRegisterScene = new DeliveryDriverRegisterScene();
-                    primaryStage.setScene(deliveryDriverRegisterScene.createDeliveryDriverRegisterScene(primaryStage, username, passwordInput.getText()));
+                try {
+                    String salt = SHA256.generateSalt();  // Generiše "salt"
+                    String hashedPassword = SHA256.hashPassword(password, salt);  // Hešira lozinku
+
+                    if (role.equals("Customer")) {
+                        CustomerRegistrationScene customerRegistrationScene = new CustomerRegistrationScene();
+                        primaryStage.setScene(customerRegistrationScene.createCustomerRegistrationScene(primaryStage, username, hashedPassword, salt));
+                    } else if (role.equals("Cashier")) {
+                        CashierRegistrationScene cashierRegistrationScene = new CashierRegistrationScene();
+                        primaryStage.setScene(cashierRegistrationScene.createCashierRegistrationScene(primaryStage, username, hashedPassword, salt));
+                    } else if (role.equals("Warehouse")) {
+                        WarehouseEmployeeRegistrationScene warehouseEmployeeRegistrationScene = new WarehouseEmployeeRegistrationScene();
+                        primaryStage.setScene(warehouseEmployeeRegistrationScene.createWarehouseEmployeeRegistrationScene(primaryStage, username, hashedPassword, salt));
+                    } else {
+                        DeliveryDriverRegisterScene deliveryDriverRegisterScene = new DeliveryDriverRegisterScene();
+                        primaryStage.setScene(deliveryDriverRegisterScene.createDeliveryDriverRegisterScene(primaryStage, username, hashedPassword, salt));
+                    }
+                } catch (NoSuchAlgorithmException ex) {
+                    ex.printStackTrace();
+                    showAlert("Error", "Failed to hash the password.");
                 }
             } else {
                 showAlert("Error", "Username already exists. Please choose another username.");
             }
         });
+
 
         return new Scene(grid, 300, 300);
     }

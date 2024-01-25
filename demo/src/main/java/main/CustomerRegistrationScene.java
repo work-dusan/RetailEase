@@ -13,7 +13,7 @@ import DB.DatabaseConnector;
 
 public class CustomerRegistrationScene {
 
-    public Scene createCustomerRegistrationScene(Stage primaryStage, String username, String password) {
+    public Scene createCustomerRegistrationScene(Stage primaryStage, String username, String password, String salt) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20, 20, 20, 20));
         grid.setVgap(10);
@@ -92,7 +92,7 @@ public class CustomerRegistrationScene {
                     CustomerValidations.validateName(lastName)) {
 
                 Customer newCustomer = new Customer(username, firstName, lastName, email, streetName, streetNumber, cityChoiceBox.getValue(), phoneNumber);
-                DatabaseConnector.insertCustomer(newCustomer, password);
+                DatabaseConnector.insertCustomer(newCustomer, password, salt);
 
                 successfulDialog("Registration Successful!");
 

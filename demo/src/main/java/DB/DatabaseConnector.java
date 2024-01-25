@@ -57,8 +57,8 @@ public class DatabaseConnector {
         }
     }
 
-    public static void insertCustomer(Customer customer, String password) {
-        String insertUserQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+    public static void insertCustomer(Customer customer, String password, String salt) {
+        String insertUserQuery = "INSERT INTO users (username, password, salt, role) VALUES (?, ?, ?, ?)";
         String insertCustomerQuery = "INSERT INTO customer (username, first_name, last_name, email, street_name, street_number, city, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection connection = null;
@@ -71,6 +71,7 @@ public class DatabaseConnector {
             try (PreparedStatement userStatement = connection.prepareStatement(insertUserQuery)) {
                 userStatement.setString(1, customer.getUsername());
                 userStatement.setString(2, password);
+                userStatement.setString(3, salt);
                 userStatement.setString(3, "Customer");
                 userStatement.executeUpdate();
             }
@@ -111,8 +112,8 @@ public class DatabaseConnector {
             }
         }
     }
-    public static void insertCashier(Cashier cashier, String password) {
-        String insertUserQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+    public static void insertCashier(Cashier cashier, String password, String salt) {
+        String insertUserQuery = "INSERT INTO users (username, password, salt, role) VALUES (?, ?, ?, ?)";
         String insertCashierQuery = "INSERT INTO cashier (username, first_name, last_name, jmbg, date_of_birth, address, phone_number, employment_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection connection = null;
@@ -126,6 +127,7 @@ public class DatabaseConnector {
                 userStatement.setString(1, cashier.getUsername());
                 // Ovde postavite šifrovanu verziju lozinke (npr. sa bcrypt)
                 userStatement.setString(2, password);
+                userStatement.setString(3, salt);
                 userStatement.setString(3, "Cashier");
                 userStatement.executeUpdate();
             }
@@ -166,8 +168,8 @@ public class DatabaseConnector {
             }
         }
     }
-    public static void insertWarehouseEmployee(WarehouseEmployee warehouseEmployee, String password) {
-        String insertUserQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+    public static void insertWarehouseEmployee(WarehouseEmployee warehouseEmployee, String password, String salt) {
+        String insertUserQuery = "INSERT INTO users (username, password, salt, role) VALUES (?, ?, ?, ?)";
         String insertWarehouseEmployeeQuery = "INSERT INTO WarehouseEmployee (username, first_name, last_name, jmbg, date_of_birth, address, phone_number, employment_date, responsibility, access_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection connection = null;
@@ -180,7 +182,8 @@ public class DatabaseConnector {
             try (PreparedStatement userStatement = connection.prepareStatement(insertUserQuery)) {
                 userStatement.setString(1, warehouseEmployee.getUsername());
                 userStatement.setString(2, password);
-                userStatement.setString(3, "WarehouseEmployee");
+                userStatement.setString(3, salt);
+                userStatement.setString(4, "WarehouseEmployee");
                 userStatement.executeUpdate();
             }
 
@@ -222,8 +225,8 @@ public class DatabaseConnector {
             }
         }
     }
-    public static void insertDeliveryDriver(DeliveryDriver driver, String password) {
-        String insertUserQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+    public static void insertDeliveryDriver(DeliveryDriver driver, String password, String salt) {
+        String insertUserQuery = "INSERT INTO users (username, password, salt, role) VALUES (?, ?, ?, ?)";
         String insertDriverQuery = "INSERT INTO driver (username, first_name, last_name, jmbg, date_of_birth, " +
                 "address, phone_number, employment_date, license_number, vehicle_info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -237,7 +240,8 @@ public class DatabaseConnector {
             try (PreparedStatement userStatement = connection.prepareStatement(insertUserQuery)) {
                 userStatement.setString(1, driver.getUsername());
                 userStatement.setString(2, password);
-                userStatement.setString(3, "Driver");
+                userStatement.setString(3, salt);
+                userStatement.setString(4, "Driver");
                 userStatement.executeUpdate();
             }
 

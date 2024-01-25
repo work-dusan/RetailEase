@@ -11,7 +11,7 @@ import validations.CashierValidations;
 
 public class CashierRegistrationScene {
 
-    public Scene createCashierRegistrationScene(Stage primaryStage, String username, String password) {
+    public Scene createCashierRegistrationScene(Stage primaryStage, String username, String password, String salt) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20, 20, 20, 20));
         grid.setVgap(10);
@@ -80,7 +80,7 @@ public class CashierRegistrationScene {
             // Dodajte validaciju pre nego što kreirate objekat Cashier
             if (validateCashierData(firstName, lastName, jmbg, dob, address, phoneNumber, employmentDate)) {
                 Cashier newCashier = new Cashier(username, firstName, lastName, jmbg, dob, address, phoneNumber, employmentDate);
-                DatabaseConnector.insertCashier(newCashier, password);
+                DatabaseConnector.insertCashier(newCashier, password, salt);
 
                 successfulDialog("Registration Successful!");
 

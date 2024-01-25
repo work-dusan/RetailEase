@@ -15,7 +15,7 @@ import java.time.LocalDate;
 
 public class WarehouseEmployeeRegistrationScene {
 
-    public Scene createWarehouseEmployeeRegistrationScene(Stage primaryStage, String username, String password) {
+    public Scene createWarehouseEmployeeRegistrationScene(Stage primaryStage, String username, String password, String salt) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20, 20, 20, 20));
         grid.setVgap(10);
@@ -104,7 +104,7 @@ public class WarehouseEmployeeRegistrationScene {
             if (validateWarehouseEmployeeData(firstName, lastName, jmbg, dob, address, phoneNumber, employmentDate, responsibility)) {
                 WarehouseEmployee newWarehouseEmployee = new WarehouseEmployee(username, firstName, lastName, jmbg,
                         dob, address, phoneNumber, employmentDate, responsibility, accessLevel);
-                DatabaseConnector.insertWarehouseEmployee(newWarehouseEmployee, password);
+                DatabaseConnector.insertWarehouseEmployee(newWarehouseEmployee, password, salt);
 
                 successfulDialog("Registration Successful!");
 

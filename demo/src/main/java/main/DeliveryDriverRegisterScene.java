@@ -15,7 +15,7 @@ import java.time.LocalDate;
 
 public class DeliveryDriverRegisterScene {
 
-    public Scene createDeliveryDriverRegisterScene(Stage primaryStage, String username, String password) {
+    public Scene createDeliveryDriverRegisterScene(Stage primaryStage, String username, String password, String salt) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20, 20, 20, 20));
         grid.setVgap(10);
@@ -100,7 +100,7 @@ public class DeliveryDriverRegisterScene {
             if (validateDeliveryDriverData(firstName, lastName, jmbg, dob, address, phoneNumber, employmentDate, licenseNumber, vehicleInfo)) {
                 DeliveryDriver newDeliveryDriver = new DeliveryDriver(username, firstName, lastName, jmbg,
                         dob, address, phoneNumber, employmentDate, licenseNumber, vehicleInfo);
-                DatabaseConnector.insertDeliveryDriver(newDeliveryDriver, password);
+                DatabaseConnector.insertDeliveryDriver(newDeliveryDriver, password, salt);
 
                 successfulDialog("Registration Sucessful!");
 
