@@ -84,13 +84,13 @@ public class WarehouseEmployeeMainScene {
         VBox center = new VBox(addAndSearch, productTableView);
         center.setAlignment(Pos.CENTER);
 
-        addProductButton.setOnAction(event -> addProductWindow(productTableView));
+        addProductButton.setOnAction(event -> addProductWindow(productTableView, loggedInEmployee));
 
         productTableView.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
                 Product selectedProduct = productTableView.getSelectionModel().getSelectedItem();
                 if (selectedProduct != null) {
-                    openProductDetailsWindow(selectedProduct, productTableView);
+                    openProductDetailsWindow(selectedProduct, productTableView, loggedInEmployee);
                 }
             }
         });
@@ -106,7 +106,13 @@ public class WarehouseEmployeeMainScene {
         Button checkExpirationButton = new Button("Check Expiration");
         checkExpirationButton.setOnAction(event -> checkExpiration(productList));
 
-        HBox bottom = new HBox(checkExpirationButton);
+        Button logoutButton = new Button("Log out");
+        logoutButton.setOnAction(event -> {
+            LoginScene login = new LoginScene();
+            primaryStage.setScene(login.createLoginScene(primaryStage));
+        });
+
+        HBox bottom = new HBox(checkExpirationButton, logoutButton);
         bottom.setAlignment(Pos.CENTER);
         bottom.setSpacing(20);
 
@@ -118,10 +124,10 @@ public class WarehouseEmployeeMainScene {
         BorderPane.setAlignment(center, Pos.CENTER);
 
 
-        return new Scene(pane, 1000, 1000);
+        return new Scene(pane, 1000, 600);
     }
 
-    private void addProductWindow(TableView<Product> productTableView){
+    private void addProductWindow(TableView<Product> productTableView, WarehouseEmployee loggedInEmployee){
         Stage addProductStage = new Stage();
 
         GridPane gridPane = new GridPane();
@@ -160,7 +166,7 @@ public class WarehouseEmployeeMainScene {
 
         addProductButton.setOnAction(event -> {
             if(validateProductFields(productIdField.getText(), productNameField.getText(), priceField.getText(), quantityField.getText(), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText())){
-                addProduct(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText());
+                addProduct(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText(), loggedInEmployee.getUsername());
                 showAlert("Success", "Product added successfully.", Alert.AlertType.CONFIRMATION);
 
                 Product newProduct = new Product(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText());
@@ -172,13 +178,15 @@ public class WarehouseEmployeeMainScene {
             }
         });
 
+        gridPane.setAlignment(Pos.CENTER);
+
         Scene addProductScene = new Scene(gridPane, 350, 400);
         addProductStage.setScene(addProductScene);
 
         addProductStage.show();
     }
 
-    private void openProductDetailsWindow(Product product, TableView<Product> productTableView) {
+    private void openProductDetailsWindow(Product product, TableView<Product> productTableView, WarehouseEmployee loggedInEmployee) {
         Stage detailsStage = new Stage();
 
         BorderPane detailsPane = new BorderPane();
@@ -234,7 +242,7 @@ public class WarehouseEmployeeMainScene {
 
         productChangeButton.setOnAction(event -> {
             if (validateProductFields(product.getProductId(), productNameField.getText(), priceField.getText(), quantityField.getText(), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText())) {
-                updateProduct(product.getProductId(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText());
+                updateProduct(product.getProductId(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText(), loggedInEmployee.getUsername());
                 showAlert("Success", "Product updated successfully.", Alert.AlertType.CONFIRMATION);
 
                 int index = productTableView.getItems().indexOf(product);

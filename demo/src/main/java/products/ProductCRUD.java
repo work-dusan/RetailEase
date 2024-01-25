@@ -12,8 +12,8 @@ import java.util.List;
 import static DB.DatabaseConnector.connect;
 
 public class ProductCRUD {
-    public static void addProduct(String productId, String productName, double price, int quantity, String type, String description, LocalDate expirationDate, String supplier) {
-        String addProductQuery = "INSERT INTO product (PRODUCT_ID, NAME, PRICE, QUANTITY, TYPE, DESCRIPTION, EXPIRATION_DATE, SUPPLIER) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    public static void addProduct(String productId, String productName, double price, int quantity, String type, String description, LocalDate expirationDate, String supplier, String username) {
+        String addProductQuery = "INSERT INTO product (PRODUCT_ID, NAME, PRICE, QUANTITY, TYPE, DESCRIPTION, EXPIRATION_DATE, SUPPLIER, WAREHOUSE_EMPLOYEE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = connect();
              PreparedStatement statement = connection.prepareStatement(addProductQuery)) {
@@ -26,6 +26,7 @@ public class ProductCRUD {
             statement.setString(6, description);
             statement.setDate(7, java.sql.Date.valueOf(expirationDate));
             statement.setString(8, supplier);
+            statement.setString(9, username);
 
             statement.executeUpdate();
 
@@ -33,8 +34,8 @@ public class ProductCRUD {
             e.printStackTrace();
         }
     }
-    public static void updateProduct(String productId, String newProductName, double newPrice, int newQuantity, String newType, String newDescription, LocalDate newExpirationDate, String newSupplier) {
-        String updateProductQuery = "UPDATE product SET NAME=?, PRICE=?, QUANTITY=?, TYPE=?, DESCRIPTION=?, EXPIRATION_DATE=?, SUPPLIER=? WHERE PRODUCT_ID=?";
+    public static void updateProduct(String productId, String newProductName, double newPrice, int newQuantity, String newType, String newDescription, LocalDate newExpirationDate, String newSupplier, String username) {
+        String updateProductQuery = "UPDATE product SET NAME=?, PRICE=?, QUANTITY=?, TYPE=?, DESCRIPTION=?, EXPIRATION_DATE=?, SUPPLIER=?, WAREHOUSE_EMPLOYEE_ID=? WHERE PRODUCT_ID=?";
 
         try (Connection connection = connect();
              PreparedStatement statement = connection.prepareStatement(updateProductQuery)) {
@@ -46,7 +47,8 @@ public class ProductCRUD {
             statement.setString(5, newDescription);
             statement.setDate(6, java.sql.Date.valueOf(newExpirationDate));
             statement.setString(7, newSupplier);
-            statement.setString(8, productId);
+            statement.setString(8, username);
+            statement.setString(9, productId);
 
             statement.executeUpdate();
 

@@ -31,7 +31,7 @@ public class Login {
                             WarehouseEmployee loggedInEmployee = WarehouseEmployee.findEmployee(username);
                             WarehouseEmployeeMainScene mainScreen = new WarehouseEmployeeMainScene();
                             primaryStage.setScene(mainScreen.createWarehouseEmployeeMainScene(primaryStage, loggedInEmployee));
-                            primaryStage.setFullScreen(true);
+                            primaryStage.setResizable(false);
                             primaryStage.setTitle("Warehouse Employee");
                         }
                     } else {
