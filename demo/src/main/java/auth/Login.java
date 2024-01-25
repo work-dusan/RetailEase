@@ -29,6 +29,7 @@ public class Login {
                         if (role.equals("WarehouseEmployee")){
                             WarehouseEmployeeMainScene mainScreen = new WarehouseEmployeeMainScene();
                             primaryStage.setScene(mainScreen.createWarehouseEmployeeMainScene(primaryStage));
+                            primaryStage.setFullScreen(true);
                         }
                     } else {
                         showAlert("Login Failed", "Invalid username or password.");

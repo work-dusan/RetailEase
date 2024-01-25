@@ -10,7 +10,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import products.Product;
 import validations.ProductValidation;
 
@@ -23,6 +25,19 @@ public class WarehouseEmployeeMainScene {
     public Scene createWarehouseEmployeeMainScene(Stage primaryStage) {
         BorderPane pane = new BorderPane();
         pane.setPadding(new Insets(20, 20, 20, 20));
+
+        Button addProductButton = new Button("Add product");
+
+        Label searchLabel = new Label("Search: ");
+        TextField searchTextField = new TextField();
+
+        GridPane search = new GridPane();
+        search.addRow(0, searchLabel, searchTextField);
+
+        BorderPane addAndSearch = new BorderPane();
+        addAndSearch.setLeft(addProductButton);
+        addAndSearch.setRight(search);
+        addAndSearch.setMaxWidth(700);
 
         ObservableList<Product> productList = fetchProducts();
 
@@ -54,6 +69,13 @@ public class WarehouseEmployeeMainScene {
 
         productTableView.getColumns().addAll(productIdColumn, productNameColumn, productPriceColumn, productQuantityColumn, productTypeColumn, productDescriptionColumn, productExpirationDateColumn, productSupplierColumn);
 
+        productTableView.setMaxSize(700, 500);
+
+        VBox center = new VBox(addAndSearch, productTableView);
+        center.setAlignment(Pos.CENTER);
+
+        addProductButton.setOnAction(event -> addProductWindow(productTableView));
+
         productTableView.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
                 Product selectedProduct = productTableView.getSelectionModel().getSelectedItem();
@@ -63,9 +85,72 @@ public class WarehouseEmployeeMainScene {
             }
         });
 
-        pane.setCenter(productTableView);
+        searchTextField.textProperty().addListener((observable, oldValue, newValue) ->
+                filterProductList(productList, productTableView, newValue)
+        );
+
+        pane.setCenter(center);
+        BorderPane.setAlignment(center, Pos.CENTER);
+
 
         return new Scene(pane, 1000, 1000);
+    }
+
+    private void addProductWindow(TableView<Product> productTableView){
+        Stage addProductStage = new Stage();
+
+        GridPane gridPane = new GridPane();
+        gridPane.setVgap(10);
+        gridPane.setHgap(10);
+
+        TextField productIdField = new TextField();
+        TextField productNameField = new TextField();
+        TextField priceField = new TextField();
+        TextField quantityField = new TextField();
+        TextField typeField = new TextField();
+        TextField descriptionField = new TextField();
+        DatePicker expirationDateField = new DatePicker();
+        TextField supplierField = new TextField();
+
+        Label productIdLabel = new Label("Product ID: ");
+        Label productNameLabel = new Label("Name: ");
+        Label priceLabel = new Label("Price: ");
+        Label quantityLabel = new Label("Quantity: ");
+        Label typeLabel = new Label("Type: ");
+        Label descriptionLabel = new Label("Description: ");
+        Label expirationDateLabel = new Label("Expiration date: ");
+        Label supplierLabel = new Label("Supplier: ");
+
+        Button addProductButton = new Button("Add product");
+
+        gridPane.addRow(0, productIdLabel, productIdField);
+        gridPane.addRow(1, productNameLabel, productNameField);
+        gridPane.addRow(2, priceLabel, priceField);
+        gridPane.addRow(3, quantityLabel, quantityField);
+        gridPane.addRow(4, typeLabel, typeField);
+        gridPane.addRow(5, descriptionLabel, descriptionField);
+        gridPane.addRow(6, expirationDateLabel, expirationDateField);
+        gridPane.addRow(7, supplierLabel, supplierField);
+        gridPane.addRow(8, addProductButton);
+
+        addProductButton.setOnAction(event -> {
+            if(validateProductFields(productIdField.getText(), productNameField.getText(), priceField.getText(), quantityField.getText(), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText())){
+                addProduct(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText());
+                showAlert("Success", "Product added successfully.", Alert.AlertType.CONFIRMATION);
+
+                Product newProduct = new Product(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText());
+                productTableView.getItems().add(newProduct);
+
+                addProductStage.close();
+            } else {
+                showAlert("Error", "Product was not added.", Alert.AlertType.ERROR);
+            }
+        });
+
+        Scene addProductScene = new Scene(gridPane, 350, 400);
+        addProductStage.setScene(addProductScene);
+
+        addProductStage.show();
     }
 
     private void openProductDetailsWindow(Product product, TableView<Product> productTableView) {
@@ -123,7 +208,7 @@ public class WarehouseEmployeeMainScene {
         detailsPane.setBottom(buttonBox);
 
         productChangeButton.setOnAction(event -> {
-            if (validateProductFields(productNameField.getText(), priceField.getText(), quantityField.getText(), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText())) {
+            if (validateProductFields(product.getProductId(), productNameField.getText(), priceField.getText(), quantityField.getText(), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText())) {
                 updateProduct(product.getProductId(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText());
                 showAlert("Success", "Product updated successfully.", Alert.AlertType.CONFIRMATION);
 
@@ -170,14 +255,26 @@ public class WarehouseEmployeeMainScene {
         detailsStage.show();
     }
 
-    private boolean validateProductFields(String productName, String price, String quantity, String type, String description, LocalDate expirationDate, String supplier) {
-        return ProductValidation.validateProductName(productName) &&
+    private boolean validateProductFields(String productId, String productName, String price, String quantity, String type, String description, LocalDate expirationDate, String supplier) {
+        return ProductValidation.validateProductId(productId) &&
+                ProductValidation.validateProductName(productName) &&
                 ProductValidation.validatePrice(Double.parseDouble(price)) &&
                 ProductValidation.validateQuantityInStock(Integer.parseInt(quantity)) &&
                 ProductValidation.validateProductType(type) &&
                 ProductValidation.validateDescription(description) &&
                 ProductValidation.validateExpirationDate(expirationDate) &&
                 ProductValidation.validateSupplier(supplier);
+    }
+
+    private void filterProductList(ObservableList<Product> originalList, TableView<Product> tableView, String keyword) {
+        ObservableList<Product> filteredList = originalList.filtered(product ->
+                product.getProductId().toLowerCase().contains(keyword.toLowerCase()) ||
+                        product.getProductName().toLowerCase().contains(keyword.toLowerCase()) ||
+                        product.getProductType().toLowerCase().contains(keyword.toLowerCase()) ||
+                        product.getSupplier().toLowerCase().contains(keyword.toLowerCase())
+        );
+
+        tableView.setItems(filteredList);
     }
 
     private void showAlert(String title, String content, Alert.AlertType type) {

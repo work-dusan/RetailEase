@@ -12,6 +12,27 @@ import java.util.List;
 import static DB.DatabaseConnector.connect;
 
 public class ProductCRUD {
+    public static void addProduct(String productId, String productName, double price, int quantity, String type, String description, LocalDate expirationDate, String supplier) {
+        String addProductQuery = "INSERT INTO product (PRODUCT_ID, NAME, PRICE, QUANTITY, TYPE, DESCRIPTION, EXPIRATION_DATE, SUPPLIER) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection connection = connect();
+             PreparedStatement statement = connection.prepareStatement(addProductQuery)) {
+
+            statement.setString(1, productId);
+            statement.setString(2, productName);
+            statement.setDouble(3, price);
+            statement.setInt(4, quantity);
+            statement.setString(5, type);
+            statement.setString(6, description);
+            statement.setDate(7, java.sql.Date.valueOf(expirationDate));
+            statement.setString(8, supplier);
+
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     public static void updateProduct(String productId, String newProductName, double newPrice, int newQuantity, String newType, String newDescription, LocalDate newExpirationDate, String newSupplier) {
         String updateProductQuery = "UPDATE product SET NAME=?, PRICE=?, QUANTITY=?, TYPE=?, DESCRIPTION=?, EXPIRATION_DATE=?, SUPPLIER=? WHERE PRODUCT_ID=?";
 
