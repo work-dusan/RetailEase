@@ -74,7 +74,7 @@ public class ProductCRUD {
                 LocalDate expirationDate = resultSet.getDate("EXPIRATION_DATE").toLocalDate();
                 String supplier = resultSet.getString("SUPPLIER");
 
-                Product product = new Product(productId, productName, price, quantity, type, description, expirationDate, supplier);
+                Product product = new Product(productId, productName, price, quantity, type, description, expirationDate, supplier, true);
                 productList.add(product);
             }
 

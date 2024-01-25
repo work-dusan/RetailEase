@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import products.Product;
+import users.WarehouseEmployee;
 import validations.ProductValidation;
 
 
@@ -22,7 +23,16 @@ import java.time.LocalDate;
 import static products.ProductCRUD.*;
 
 public class WarehouseEmployeeMainScene {
-    public Scene createWarehouseEmployeeMainScene(Stage primaryStage) {
+    public Scene createWarehouseEmployeeMainScene(Stage primaryStage, WarehouseEmployee loggedInEmployee) {
+
+        // TOP - START
+
+        Label welcomeLabel = new Label("Welcome, " + loggedInEmployee.getFirstName() + " " + loggedInEmployee.getLastName());
+        welcomeLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+
+        // TOP - END
+        // CENTER - START
+
         BorderPane pane = new BorderPane();
         pane.setPadding(new Insets(20, 20, 20, 20));
 
@@ -89,7 +99,22 @@ public class WarehouseEmployeeMainScene {
                 filterProductList(productList, productTableView, newValue)
         );
 
+        // CENTER - END
+
+        // BOTTOM - START
+
+        Button checkExpirationButton = new Button("Check Expiration");
+        checkExpirationButton.setOnAction(event -> checkExpiration(productList));
+
+        HBox bottom = new HBox(checkExpirationButton);
+        bottom.setAlignment(Pos.CENTER);
+        bottom.setSpacing(20);
+
+        // BOTTOM - END
+
+        pane.setTop(welcomeLabel);
         pane.setCenter(center);
+        pane.setBottom(bottom);
         BorderPane.setAlignment(center, Pos.CENTER);
 
 
@@ -276,6 +301,24 @@ public class WarehouseEmployeeMainScene {
 
         tableView.setItems(filteredList);
     }
+
+    private void checkExpiration(ObservableList<Product> productList) {
+        LocalDate currentDate = LocalDate.now();
+        StringBuilder expiredProducts = new StringBuilder("Expired Products:\n");
+
+        for (Product product : productList) {
+            if (product.getExpirationDate() != null && product.getExpirationDate().isBefore(currentDate)) {
+                expiredProducts.append(product.getProductId() + " " + product.getProductName()).append("\n");
+            }
+        }
+
+        if (expiredProducts.length() > 18) {
+            showAlert("Expired Products", expiredProducts.toString(), Alert.AlertType.INFORMATION);
+        } else {
+            showAlert("Expired Products", "No products have expired.", Alert.AlertType.INFORMATION);
+        }
+    }
+
 
     private void showAlert(String title, String content, Alert.AlertType type) {
         Alert alert = new Alert(type);

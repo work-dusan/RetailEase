@@ -4,6 +4,7 @@ import DB.DatabaseConnector;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import main.WarehouseEmployeeMainScene;
+import users.WarehouseEmployee;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,9 +28,11 @@ public class Login {
                         String role = resultSet.getString("role");
                         showAlert("Login Successful", "Welcome, " + username + "!");
                         if (role.equals("WarehouseEmployee")){
+                            WarehouseEmployee loggedInEmployee = WarehouseEmployee.findEmployee(username);
                             WarehouseEmployeeMainScene mainScreen = new WarehouseEmployeeMainScene();
-                            primaryStage.setScene(mainScreen.createWarehouseEmployeeMainScene(primaryStage));
+                            primaryStage.setScene(mainScreen.createWarehouseEmployeeMainScene(primaryStage, loggedInEmployee));
                             primaryStage.setFullScreen(true);
+                            primaryStage.setTitle("Warehouse Employee");
                         }
                     } else {
                         showAlert("Login Failed", "Invalid username or password.");

@@ -1,7 +1,13 @@
 package users;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import validations.WarehouseValidations;
+
+import static DB.DatabaseConnector.connect;
 
 public class WarehouseEmployee {
     private String username;
@@ -168,5 +174,34 @@ public class WarehouseEmployee {
                 ", responsibility='" + responsibility + '\'' +
                 ", accessLevel='" + accessLevel + '\'' +
                 '}';
+    }
+
+    public static WarehouseEmployee findEmployee(String username){
+        try (Connection connection = connect();
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM warehouseemployee WHERE username = ?")) {
+            statement.setString(1, username);
+
+            ResultSet resultSet = statement.executeQuery();
+            WarehouseEmployee employee = null;
+
+            while (resultSet.next()){
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                String jmbg = resultSet.getString("jmbg");
+                LocalDate dateOfBirth = resultSet.getDate("date_of_birth").toLocalDate();
+                String address = resultSet.getString("address");
+                String phoneNumber = resultSet.getString("phone_number");
+                LocalDate employmentDate = resultSet.getDate("employment_date").toLocalDate();
+                String responsibility = resultSet.getString("responsibility");
+                String accessLevel = resultSet.getString("access_level");
+
+                employee = new WarehouseEmployee(username, firstName, lastName, jmbg, dateOfBirth, address, phoneNumber, employmentDate, responsibility, accessLevel);
+
+            }
+            return employee;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

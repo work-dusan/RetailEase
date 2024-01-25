@@ -36,6 +36,17 @@ public class Product {
         }
     }
 
+    public Product(String productId, String productName, double price, int quantityInStock, String productType, String description, LocalDate expirationDate, String supplier, boolean skipValidation) {
+        this.productId = productId;
+        this.productName = productName;
+        this.price = price;
+        this.quantityInStock = quantityInStock;
+        this.productType = productType;
+        this.description = description;
+        this.expirationDate = expirationDate;
+        this.supplier = supplier;
+    }
+
     // Dodajte gettere i settere prema potrebi
 
     public String getProductId() {
