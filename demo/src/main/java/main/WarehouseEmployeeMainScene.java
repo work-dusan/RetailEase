@@ -1,28 +1,39 @@
 package main;
 
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import products.ImageTableCell;
 import products.Product;
 import users.WarehouseEmployee;
 import validations.ProductValidation;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 
 import static products.ProductCRUD.*;
 
 public class WarehouseEmployeeMainScene {
+    private File selectedImageFile;
+
     public Scene createWarehouseEmployeeMainScene(Stage primaryStage, WarehouseEmployee loggedInEmployee) {
 
         // TOP - START
@@ -47,7 +58,7 @@ public class WarehouseEmployeeMainScene {
         BorderPane addAndSearch = new BorderPane();
         addAndSearch.setLeft(addProductButton);
         addAndSearch.setRight(search);
-        addAndSearch.setMaxWidth(700);
+        addAndSearch.setMaxWidth(800);
 
         ObservableList<Product> productList = fetchProducts();
 
@@ -55,6 +66,11 @@ public class WarehouseEmployeeMainScene {
 
         TableColumn<Product, String> productIdColumn = new TableColumn<>("Product ID");
         productIdColumn.setCellValueFactory(new PropertyValueFactory<>("productId"));
+
+        TableColumn<Product, Image> productImageColumn = new TableColumn<>("Image");
+        productImageColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getProductImage()));
+        productImageColumn.setCellFactory(col -> new ImageTableCell());
+
 
         TableColumn<Product, String> productNameColumn = new TableColumn<>("Name");
         productNameColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
@@ -77,9 +93,9 @@ public class WarehouseEmployeeMainScene {
         TableColumn<Product, String> productSupplierColumn = new TableColumn<>("Supplier");
         productSupplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplier"));
 
-        productTableView.getColumns().addAll(productIdColumn, productNameColumn, productPriceColumn, productQuantityColumn, productTypeColumn, productDescriptionColumn, productExpirationDateColumn, productSupplierColumn);
+        productTableView.getColumns().addAll(productIdColumn, productImageColumn, productNameColumn, productPriceColumn, productQuantityColumn, productTypeColumn, productDescriptionColumn, productExpirationDateColumn, productSupplierColumn);
 
-        productTableView.setMaxSize(700, 500);
+        productTableView.setMaxSize(800, 500);
 
         VBox center = new VBox(addAndSearch, productTableView);
         center.setAlignment(Pos.CENTER);
@@ -143,6 +159,10 @@ public class WarehouseEmployeeMainScene {
         DatePicker expirationDateField = new DatePicker();
         TextField supplierField = new TextField();
 
+        ImageView productImageView = new ImageView();
+        FileChooser fileChooser = new FileChooser();
+        Button uploadImageButton = new Button("Upload Image");
+
         Label productIdLabel = new Label("Product ID: ");
         Label productNameLabel = new Label("Name: ");
         Label priceLabel = new Label("Price: ");
@@ -162,14 +182,24 @@ public class WarehouseEmployeeMainScene {
         gridPane.addRow(5, descriptionLabel, descriptionField);
         gridPane.addRow(6, expirationDateLabel, expirationDateField);
         gridPane.addRow(7, supplierLabel, supplierField);
-        gridPane.addRow(8, addProductButton);
+        gridPane.addRow(8, uploadImageButton, productImageView);
+        gridPane.addRow(9, addProductButton);
+
+        uploadImageButton.setOnAction(event -> {
+            File file = fileChooser.showOpenDialog(addProductStage);
+            if (file != null) {
+                selectedImageFile = file;
+                displayImageAndScale(file, productImageView);
+            }
+        });
 
         addProductButton.setOnAction(event -> {
             if(validateProductFields(productIdField.getText(), productNameField.getText(), priceField.getText(), quantityField.getText(), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText())){
-                addProduct(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText(), loggedInEmployee.getUsername());
+                addProduct(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText(), productImageView.getImage(), loggedInEmployee.getUsername());
+
                 showAlert("Success", "Product added successfully.", Alert.AlertType.CONFIRMATION);
 
-                Product newProduct = new Product(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText());
+                Product newProduct = new Product(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText(), productImageView.getImage());
                 productTableView.getItems().add(newProduct);
 
                 addProductStage.close();
@@ -180,7 +210,7 @@ public class WarehouseEmployeeMainScene {
 
         gridPane.setAlignment(Pos.CENTER);
 
-        Scene addProductScene = new Scene(gridPane, 350, 400);
+        Scene addProductScene = new Scene(gridPane, 350, 450);
         addProductStage.setScene(addProductScene);
 
         addProductStage.show();
@@ -199,6 +229,7 @@ public class WarehouseEmployeeMainScene {
         TextField descriptionField = new TextField(product.getDescription());
         DatePicker expirationDateField = new DatePicker(product.getExpirationDate());
         TextField supplierField = new TextField(product.getSupplier());
+        ImageView productImage = new ImageView(product.getProductImage());
 
         Label productIdLabel = new Label("Product ID: ");
         Label productNameLabel = new Label("Name: ");
@@ -208,6 +239,7 @@ public class WarehouseEmployeeMainScene {
         Label descriptionLabel = new Label("Description: ");
         Label expirationDateLabel = new Label("Expiration date: ");
         Label supplierLabel = new Label("Supplier: ");
+        Label imageLabel = new Label("Image");
 
         GridPane gridPane = new GridPane();
         gridPane.setVgap(10);
@@ -221,6 +253,7 @@ public class WarehouseEmployeeMainScene {
         gridPane.addRow(5, descriptionLabel, descriptionField);
         gridPane.addRow(6, expirationDateLabel, expirationDateField);
         gridPane.addRow(7, supplierLabel, supplierField);
+        gridPane.addRow(8, imageLabel, productImage);
 
         Label title = new Label("PRODUCT INFORMATION");
         title.setPadding(new Insets(0, 0, 20, 0));
@@ -247,7 +280,7 @@ public class WarehouseEmployeeMainScene {
 
                 int index = productTableView.getItems().indexOf(product);
 
-                productTableView.getItems().set(index, new Product(product.getProductId(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText()));
+                productTableView.getItems().set(index, new Product(product.getProductId(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText(), productImage.getImage()));
                 productTableView.refresh();
 
                 detailsStage.close();
@@ -316,7 +349,7 @@ public class WarehouseEmployeeMainScene {
 
         for (Product product : productList) {
             if (product.getExpirationDate() != null && product.getExpirationDate().isBefore(currentDate)) {
-                expiredProducts.append(product.getProductId() + " " + product.getProductName()).append("\n");
+                expiredProducts.append(product.getProductId()).append(" ").append(product.getProductName()).append("\n");
             }
         }
 
@@ -326,7 +359,26 @@ public class WarehouseEmployeeMainScene {
             showAlert("Expired Products", "No products have expired.", Alert.AlertType.INFORMATION);
         }
     }
+    private void displayImageAndScale(File file, ImageView imageView) {
+        try {
+            byte[] imageData = Files.readAllBytes(file.toPath());
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+            Image originalImage = new Image(inputStream);
 
+            // Setting image size
+            double originalWidth = originalImage.getWidth();
+            double originalHeight = originalImage.getHeight();
+
+            double scaleFactor = Math.min((double) 100 / originalWidth, (double) 100 / originalHeight);
+
+            imageView.setFitWidth(originalWidth * scaleFactor);
+            imageView.setFitHeight(originalHeight * scaleFactor);
+            imageView.setImage(originalImage);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void showAlert(String title, String content, Alert.AlertType type) {
         Alert alert = new Alert(type);

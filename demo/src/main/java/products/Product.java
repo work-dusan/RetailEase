@@ -1,6 +1,8 @@
 package products;
 
 import java.time.LocalDate;
+
+import javafx.scene.image.Image;
 import validations.ProductValidation;
 
 public class Product {
@@ -12,9 +14,10 @@ public class Product {
     private String description;
     private LocalDate expirationDate;
     private String supplier;
+    private transient Image productImage;
 
     public Product(String productId, String productName, double price, int quantityInStock, String productType,
-                   String description, LocalDate expirationDate, String supplier) {
+                   String description, LocalDate expirationDate, String supplier, Image productImage) {
         if (ProductValidation.validateProductId(productId) &&
                 ProductValidation.validateProductName(productName) &&
                 ProductValidation.validatePrice(price) &&
@@ -31,12 +34,13 @@ public class Product {
             this.description = description;
             this.expirationDate = expirationDate;
             this.supplier = supplier;
+            this.productImage = productImage;
         } else {
             throw new IllegalArgumentException("Invalid data provided for product");
         }
     }
 
-    public Product(String productId, String productName, double price, int quantityInStock, String productType, String description, LocalDate expirationDate, String supplier, boolean skipValidation) {
+    public Product(String productId, String productName, double price, int quantityInStock, String productType, String description, LocalDate expirationDate, String supplier, Image productImage, boolean skipValidation) {
         this.productId = productId;
         this.productName = productName;
         this.price = price;
@@ -45,9 +49,8 @@ public class Product {
         this.description = description;
         this.expirationDate = expirationDate;
         this.supplier = supplier;
+        this.productImage = productImage;
     }
-
-    // Dodajte gettere i settere prema potrebi
 
     public String getProductId() {
         return productId;
@@ -145,10 +148,18 @@ public class Product {
         }
     }
 
+    public Image getProductImage() {
+        return productImage;
+    }
+
+    public void setProductImage(Image productImage) {
+        this.productImage = productImage;
+    }
+
     @Override
     public String toString() {
         return "Product{" +
-                "productId=" + productId +
+                "productId='" + productId + '\'' +
                 ", productName='" + productName + '\'' +
                 ", price=" + price +
                 ", quantityInStock=" + quantityInStock +
@@ -156,6 +167,8 @@ public class Product {
                 ", description='" + description + '\'' +
                 ", expirationDate=" + expirationDate +
                 ", supplier='" + supplier + '\'' +
+                ", productImage=" + productImage +
                 '}';
     }
+
 }

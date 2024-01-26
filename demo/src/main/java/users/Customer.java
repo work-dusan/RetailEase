@@ -2,6 +2,14 @@ package users;
 
 import validations.CustomerValidations;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+
+import static DB.DatabaseConnector.connect;
+
 public class Customer {
 
     private String username;
@@ -133,6 +141,33 @@ public class Customer {
                 ", city='" + city + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 '}';
+    }
+
+    public static Customer findCustomer(String username){
+        try (Connection connection = connect();
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM customer WHERE username = ?")) {
+            statement.setString(1, username);
+
+            ResultSet resultSet = statement.executeQuery();
+            Customer employee = null;
+
+            while (resultSet.next()){
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                String email = resultSet.getString("email");
+                String streetName = resultSet.getString("street_name");
+                String streetNumber = resultSet.getString("street_number");
+                String phoneNumber = resultSet.getString("phone_number");
+                String city = resultSet.getString("city");
+
+                employee = new Customer(username, firstName, lastName, email, streetName, streetNumber, city, phoneNumber);
+
+            }
+            return employee;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
 

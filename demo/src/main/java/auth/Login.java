@@ -4,7 +4,9 @@ import DB.DatabaseConnector;
 import encryptor.SHA256;  // Dodajte import za SHA256 klasu
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import main.CustomerMainScene;
 import main.WarehouseEmployeeMainScene;
+import users.Customer;
 import users.WarehouseEmployee;
 
 import java.security.NoSuchAlgorithmException;
@@ -43,6 +45,12 @@ public class Login {
                                 primaryStage.setScene(mainScreen.createWarehouseEmployeeMainScene(primaryStage, loggedInEmployee));
                                 primaryStage.setResizable(false);
                                 primaryStage.setTitle("Warehouse Employee");
+                            } else if (role.equals("Customer")) {
+                                Customer loggedInCustomer = Customer.findCustomer(username);
+                                CustomerMainScene mainScene = new CustomerMainScene();
+                                primaryStage.setScene(mainScene.createCustomerMainScene(primaryStage, loggedInCustomer));
+                                primaryStage.setResizable(false);
+                                primaryStage.setTitle("Customer");
                             }
                         } else {
                             showAlert("Login Failed", "Invalid username or password.");
