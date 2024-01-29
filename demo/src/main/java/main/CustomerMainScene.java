@@ -32,6 +32,7 @@ public class CustomerMainScene {
     private static ListView<CartItem> cartListView;
     private static Label totalLabel;
     private VBox cartContents;
+    private boolean isCartShowed = false;
 
     private static Spinner<Integer> currentSpinner;
 
@@ -155,7 +156,10 @@ public class CustomerMainScene {
         cartListView = new ListView<>(cartItems);
         cartListView.setCellFactory(param -> new CartItemCell());
 
-        cartContents.getChildren().add(cartListView);
+        if(!isCartShowed) {
+            cartContents.getChildren().add(cartListView);
+            isCartShowed = true;
+        }
 
         // Inicijalizujte label za ukupnu cenu
         totalLabel = new Label("Total: " + calculateTotal());

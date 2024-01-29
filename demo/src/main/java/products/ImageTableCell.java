@@ -10,7 +10,7 @@ public class ImageTableCell extends TableCell<Product, Image> {
     private final ImageView imageView = new ImageView();
 
     public ImageTableCell() {
-        setGraphic(imageView);
+         setGraphic(imageView);
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
 

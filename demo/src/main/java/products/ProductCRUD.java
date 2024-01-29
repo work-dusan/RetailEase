@@ -7,9 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritablePixelFormat;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.sql.*;
@@ -20,7 +18,9 @@ import java.util.List;
 import static DB.DatabaseConnector.connect;
 
 public class ProductCRUD {
-    public static void addProduct(String productId, String productName, double price, int quantity, String type, String description, LocalDate expirationDate, String supplier, Image productImage, String username) {
+    public static void addProduct(String productId, String productName, double price, int quantity,
+                                  String type, String description, LocalDate expirationDate,
+                                  String supplier, File productImage, String username) {
         String addProductQuery = "INSERT INTO product (PRODUCT_ID, NAME, PRICE, QUANTITY, TYPE, DESCRIPTION, EXPIRATION_DATE, SUPPLIER, IMAGE_DATA, WAREHOUSE_EMPLOYEE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = connect()) {
@@ -35,11 +35,13 @@ public class ProductCRUD {
                 statement.setString(6, description);
                 statement.setDate(7, Date.valueOf(expirationDate));
                 statement.setString(8, supplier);
-                statement.setBytes(9, convertImageToBytes(productImage));
+                statement.setBinaryStream(9, new FileInputStream(productImage), (int) productImage.length());
                 statement.setString(10, username);
 
                 statement.executeUpdate();
 
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -123,54 +125,6 @@ public class ProductCRUD {
         }
     }
 
-    public static void addProductImage(String productId, File imageFile) {
-        String addImageQuery = "INSERT INTO productimage (product_id, image_data) VALUES (?, ?)";
-
-        try (Connection connection = connect()) {
-            assert connection != null;
-            try (PreparedStatement statement = connection.prepareStatement(addImageQuery)) {
-
-                statement.setString(1, productId);
-
-                byte[] imageData = Files.readAllBytes(imageFile.toPath());
-                statement.setBytes(2, imageData);
-
-                statement.executeUpdate();
-
-            }
-        } catch (IOException | SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static List<Image> fetchProductImages(List<String> productIds) {
-        List<Image> images = new ArrayList<>();
-
-        String sql = "SELECT image_data FROM productimage WHERE product_id = ?";
-        try (Connection connection = connect()) {
-            assert connection != null;
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-
-                for (String productId : productIds) {
-                    statement.setString(1, productId);
-                    try (ResultSet resultSet = statement.executeQuery()) {
-                        if (resultSet.next()) {
-                            // Image expected in first row
-                            byte[] imageData = resultSet.getBytes("image_data");
-                            Image image = convertToImage(imageData);
-                            images.add(image);
-                        }
-                    }
-                }
-
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return images;
-    }
-
     private static Image convertToImage(byte[] imageData) {
         try {
             if (imageData != null) {
@@ -183,19 +137,4 @@ public class ProductCRUD {
         return null;
     }
 
-
-
-    public static byte[] convertImageToBytes(Image image) {
-        int width = (int) image.getWidth();
-        int height = (int) image.getHeight();
-
-        PixelReader pixelReader = image.getPixelReader();
-
-        // Konvertuj piksele u RGBA format
-        WritablePixelFormat<ByteBuffer> pixelFormat = WritablePixelFormat.getByteBgraInstance();
-        byte[] buffer = new byte[width * height * 4];
-        pixelReader.getPixels(0, 0, width, height, pixelFormat, buffer, 0, width * 4);
-
-        return buffer;
-    }
 }

@@ -1,6 +1,7 @@
 package main;
 
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javafx.util.Callback;
 import products.ImageTableCell;
 import products.Product;
 import users.WarehouseEmployee;
@@ -68,8 +70,29 @@ public class WarehouseEmployeeMainScene {
         productIdColumn.setCellValueFactory(new PropertyValueFactory<>("productId"));
 
         TableColumn<Product, Image> productImageColumn = new TableColumn<>("Image");
-        productImageColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getProductImage()));
-        productImageColumn.setCellFactory(col -> new ImageTableCell());
+      //  productImageColumn.setCellValueFactory();
+
+        productImageColumn.setCellFactory(param -> {
+            //Set up the ImageView
+            final ImageView imageview = new ImageView();
+            imageview.setFitHeight(50);
+            imageview.setFitWidth(50);
+
+            //Set up the Table
+            TableCell<Product, Image> cell = new TableCell<>() {
+                public void updateItem(Image item, boolean empty) {
+                    if (item != null) {
+                        imageview.setImage(item);
+                    }
+                }
+            };
+            // Attach the imageview to the cell
+            cell.setGraphic(imageview);
+            return cell;
+        });
+        productImageColumn.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getProductImage()));
+
+
 
 
         TableColumn<Product, String> productNameColumn = new TableColumn<>("Name");
@@ -195,7 +218,7 @@ public class WarehouseEmployeeMainScene {
 
         addProductButton.setOnAction(event -> {
             if(validateProductFields(productIdField.getText(), productNameField.getText(), priceField.getText(), quantityField.getText(), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText())){
-                addProduct(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText(), productImageView.getImage(), loggedInEmployee.getUsername());
+                addProduct(productIdField.getText(), productNameField.getText(), Double.parseDouble(priceField.getText()), Integer.parseInt(quantityField.getText()), typeField.getText(), descriptionField.getText(), expirationDateField.getValue(), supplierField.getText(), selectedImageFile, loggedInEmployee.getUsername());
 
                 showAlert("Success", "Product added successfully.", Alert.AlertType.CONFIRMATION);
 
