@@ -64,8 +64,14 @@ public class CustomerMainScene {
 
         VBox middle = new VBox();
 
+        ObservableList<Product> productList = fetchProducts();
+
         Label searchLabel = new Label("Search: ");
         TextField searchTextField = new TextField();
+
+        searchTextField.textProperty().addListener((observable, oldValue, newValue) ->
+                filterProductList(productList, productTableView, newValue)
+        );
 
         GridPane search = new GridPane();
         search.addRow(0, searchLabel, searchTextField);
@@ -74,8 +80,6 @@ public class CustomerMainScene {
         BorderPane searchBorderPane = new BorderPane();
         searchBorderPane.setRight(search);
         searchBorderPane.setMaxWidth(800);
-
-        ObservableList<Product> productList = fetchProducts();
 
         productTableView = new TableView<>(productList);
 
@@ -293,6 +297,17 @@ public class CustomerMainScene {
         totalLabel.setText("Total: " + calculateTotal());
     }
 
+    // Filtering product list
+    private void filterProductList(ObservableList<Product> originalList, TableView<Product> tableView, String keyword) {
+        ObservableList<Product> filteredList = originalList.filtered(product ->
+                product.getProductId().toLowerCase().contains(keyword.toLowerCase()) ||
+                        product.getProductName().toLowerCase().contains(keyword.toLowerCase()) ||
+                        product.getProductType().toLowerCase().contains(keyword.toLowerCase()) ||
+                        product.getSupplier().toLowerCase().contains(keyword.toLowerCase()) ||
+                        (product.getPrice() == Double.parseDouble(keyword))
+        );
 
+        tableView.setItems(filteredList);
+    }
 
 }

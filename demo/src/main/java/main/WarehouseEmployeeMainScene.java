@@ -1,7 +1,6 @@
 package main;
 
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,8 +17,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import javafx.util.Callback;
-import products.ImageTableCell;
 import products.Product;
 import users.WarehouseEmployee;
 import validations.ProductValidation;
@@ -70,13 +67,11 @@ public class WarehouseEmployeeMainScene {
         productIdColumn.setCellValueFactory(new PropertyValueFactory<>("productId"));
 
         TableColumn<Product, Image> productImageColumn = new TableColumn<>("Image");
-      //  productImageColumn.setCellValueFactory();
-
         productImageColumn.setCellFactory(param -> {
             //Set up the ImageView
             final ImageView imageview = new ImageView();
             imageview.setFitHeight(50);
-            imageview.setFitWidth(50);
+            imageview.setFitWidth(70);
 
             //Set up the Table
             TableCell<Product, Image> cell = new TableCell<>() {
@@ -91,9 +86,6 @@ public class WarehouseEmployeeMainScene {
             return cell;
         });
         productImageColumn.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getProductImage()));
-
-
-
 
         TableColumn<Product, String> productNameColumn = new TableColumn<>("Name");
         productNameColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
