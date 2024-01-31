@@ -1,8 +1,9 @@
 package main;
 
-import javafx.animation.Interpolator;
-import javafx.animation.TranslateTransition;
+import DB.DatabaseConnector;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -11,32 +12,27 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import products.CartItem;
-import products.ImageTableCell;
 import products.Product;
+import products.ShoppingCart;
 import users.Customer;
+import validations.CustomerValidations;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static products.ProductCRUD.fetchProducts;
 
 public class CustomerMainScene {
 
-    private static ObservableList<CartItem> cartItems = FXCollections.observableArrayList();
     private TableView<Product> productTableView = new TableView<>();
-    private boolean isCartOpen = false;
-    private static ListView<CartItem> cartListView;
-    private static Label totalLabel;
-    private VBox cartContents;
-    private boolean isCartShowed = false;
+    private boolean isCartVisible = false;
+    private ShoppingCart shoppingCart = new ShoppingCart();
 
-    private static Spinner<Integer> currentSpinner;
 
-    public Scene createCustomerMainScene(Stage primaryStage, Customer customer){
+    public Scene createCustomerMainScene(Stage primaryStage, Customer customer) {
 
         // TOP - START
 
@@ -53,7 +49,7 @@ public class CustomerMainScene {
         titleLabel.setAlignment(Pos.CENTER);
         StackPane titlePane = new StackPane(titleLabel);
         welcomeLabel.setAlignment(Pos.CENTER_LEFT);
-        VBox.setMargin(welcomeLabel, new Insets(0,0,0,50));
+        VBox.setMargin(welcomeLabel, new Insets(0, 0, 0, 50));
 
         top.setSpacing(20);
         top.getChildren().addAll(titlePane, welcomeLabel);
@@ -85,42 +81,57 @@ public class CustomerMainScene {
 
         TableColumn<Product, String> productIdColumn = new TableColumn<>("Product ID");
         productIdColumn.setCellValueFactory(new PropertyValueFactory<>("productId"));
+        productIdColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, Image> productImageColumn = new TableColumn<>("Image");
-        productImageColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getProductImage()));
-        productImageColumn.setCellFactory(col -> new ImageTableCell());
+        productImageColumn.setCellFactory(param -> {
+            //Set up the ImageView
+            final ImageView imageview = new ImageView();
+            imageview.setFitHeight(100);
+            imageview.setFitWidth(100);
+
+            //Set up the Table
+            TableCell<Product, Image> cell = new TableCell<>() {
+                public void updateItem(Image item, boolean empty) {
+                    if (item != null) {
+                        imageview.setImage(item);
+                    }
+                }
+            };
+            // Attach the imageview to the cell
+            cell.setGraphic(imageview);
+            return cell;
+        });
+        productImageColumn.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getProductImage()));
+        productImageColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, String> productNameColumn = new TableColumn<>("Name");
         productNameColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
+        productNameColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, Double> productPriceColumn = new TableColumn<>("Price");
         productPriceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        productPriceColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, String> productTypeColumn = new TableColumn<>("Type");
         productTypeColumn.setCellValueFactory(new PropertyValueFactory<>("productType"));
+        productTypeColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, String> productDescriptionColumn = new TableColumn<>("Description");
         productDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+        productDescriptionColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, LocalDate> productExpirationDateColumn = new TableColumn<>("Expiration date");
         productExpirationDateColumn.setCellValueFactory(new PropertyValueFactory<>("expirationDate"));
+        productExpirationDateColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, String> productSupplierColumn = new TableColumn<>("Supplier");
         productSupplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplier"));
+        productSupplierColumn.setStyle("-fx-alignment: CENTER;");
 
         productTableView.getColumns().addAll(productIdColumn, productImageColumn, productNameColumn, productPriceColumn, productTypeColumn, productDescriptionColumn, productExpirationDateColumn, productSupplierColumn);
 
         productTableView.setMaxSize(800, 500);
-
-        productTableView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                // Dodavanje proizvoda u korpu prilikom dvostrukog klika
-                Product selectedProduct = productTableView.getSelectionModel().getSelectedItem();
-                if (selectedProduct != null) {
-                    addToCart(selectedProduct);
-                }
-            }
-        });
 
         middle.setSpacing(20);
         middle.setAlignment(Pos.CENTER);
@@ -130,182 +141,265 @@ public class CustomerMainScene {
 
         // RIGHT - START
 
-        VBox placeholder = new VBox();
-        placeholder.setVisible(false);
+        HBox right = new HBox();
+        HBox.setHgrow(right, Priority.ALWAYS);
+
+        VBox cartBox = new VBox();
+
+        Label totalLabel = new Label("Total: " + calculateTotal() + " din");
+
+        TableView<CartItem> cartTableView = new TableView<>(shoppingCart.getItems());
+
+        TableColumn<CartItem, String> cartProductIdColumn = new TableColumn<>("Product ID");
+        cartProductIdColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getProductId()));
+
+        TableColumn<CartItem, String> cartProductNameColumn = new TableColumn<>("Name");
+        cartProductNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getProduct().getProductName()));
+
+        TableColumn<CartItem, Integer> cartProductQuantityColumn = new TableColumn<>("Quantity");
+        cartProductQuantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+
+        TableColumn<CartItem, Double> cartProductPriceColumn = new TableColumn<>("Price");
+        cartProductPriceColumn.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getProduct().getPrice() * cellData.getValue().getQuantity()).asObject());
+
+        TableColumn<CartItem, Void> cartRemoveColumn = new TableColumn<>("Remove");
+        cartRemoveColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button removeButton = new Button("Remove");
+
+            {
+                removeButton.setOnAction(event -> {
+                    CartItem cartItem = getTableView().getItems().get(getIndex());
+                    shoppingCart.removeItem(cartItem);
+                    cartTableView.setItems(shoppingCart.getItems());
+                    cartTableView.refresh();
+                    totalLabel.setText("Total: " + calculateTotal() + " din");
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(removeButton);
+                }
+            }
+        });
+
+        cartTableView.getColumns().addAll(cartProductIdColumn, cartProductNameColumn, cartProductQuantityColumn, cartProductPriceColumn, cartRemoveColumn);
+
+        VBox cartContent = new VBox();
+        cartContent.getChildren().addAll(new Label("Shopping Cart"), cartTableView);
+
+        totalLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #FF4500; -fx-font-weight: bold;");
+        Button checkoutButton = new Button("Checkout");
+        cartBox.getChildren().addAll(new Label("Shopping Cart"), cartTableView, totalLabel, checkoutButton);
 
         // RIGHT - END
 
+        // LEFT - START
+
+        VBox left = new VBox();
+
+        Button changeInfoButton = new Button("Change Information");
+        Button logoutButton = new Button("Logout");
+
+        left.setSpacing(10);
+        left.setAlignment(Pos.CENTER_LEFT);
+        VBox.setMargin(changeInfoButton, new Insets(20, 0, 0, 20));
+        VBox.setMargin(logoutButton, new Insets(0, 0, 0, 20));
+
+        left.getChildren().addAll(changeInfoButton, logoutButton);
+
+        root.setLeft(left);
+
+        // LEFT - END
+
         // BOTTOM - START
 
+        HBox bottom = new HBox();
         Button cartButton = new Button("Cart");
-        cartButton.setOnAction(e -> toggleCart(placeholder));
-        BorderPane.setAlignment(cartButton, Pos.BOTTOM_RIGHT);
-        BorderPane.setMargin(cartButton, new Insets(0, 10, 10, 0));
+
+        HBox.setHgrow(cartButton, Priority.ALWAYS);
+        bottom.setAlignment(Pos.BOTTOM_RIGHT);
+
+        BorderPane.setAlignment(bottom, Pos.BOTTOM_RIGHT);
+        bottom.getChildren().addAll(cartButton);
 
         // BOTTOM - END
 
         root.setTop(top);
         root.setCenter(middle);
-        root.setBottom(cartButton);
-        root.setRight(placeholder);
+        root.setRight(right);
+        root.setBottom(bottom);
+
+        // EVENTS
+
+        productTableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                Product selectedProduct = productTableView.getSelectionModel().getSelectedItem();
+                if (selectedProduct != null) {
+                    // Check if product is in cart
+                    boolean alreadyInCart = false;
+                    for (CartItem cartItem : shoppingCart.getItems()) {
+                        if (cartItem.getProduct().equals(selectedProduct)) {
+                            cartItem.setQuantity(cartItem.getQuantity() + 1);
+                            alreadyInCart = true;
+                            break;
+                        }
+                    }
+
+                    // Product not in cart
+                    if (!alreadyInCart) {
+                        if (selectedProduct.getQuantityInStock() > 0) {
+                            shoppingCart.addItem(selectedProduct, 1);
+                        } else {
+                            System.out.println("Product is out of stock.");
+                        }
+                    }
+
+                    // Update tableView
+                    cartTableView.setItems(shoppingCart.getItems());
+                    cartTableView.refresh();
+                    totalLabel.setText("Total: " + calculateTotal() + " din");
+                }
+            }
+        });
+        cartButton.setOnAction(event -> {
+            if (!isCartVisible) {
+                showCart(right, cartBox);
+            } else {
+                hideCart(right);
+            }
+        });
+        logoutButton.setOnAction(event -> {
+            LoginScene loginScene = new LoginScene();
+            primaryStage.setScene(loginScene.createLoginScene(primaryStage));
+        });
+        changeInfoButton.setOnAction(event -> {
+
+            Stage changeinfoStage = new Stage();
+
+            BorderPane changeInfoPane = new BorderPane();
+            VBox center = new VBox();
+
+            Label changeInfoLabel = new Label("Change Information");
+            changeInfoLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+            GridPane gridPane = new GridPane();
+            gridPane.setAlignment(Pos.CENTER);
+            gridPane.setHgap(10);
+            gridPane.setVgap(10);
+
+            Label firstNameLabel = new Label("First Name:");
+            TextField firstNameField = new TextField(customer.getFirstName());
+
+            Label lastNameLabel = new Label("Last Name:");
+            TextField lastNameField = new TextField(customer.getLastName());
+
+            Label emailLabel = new Label("Email:");
+            TextField emailField = new TextField(customer.getEmail());
+
+            Label streetNameLabel = new Label("Street Name:");
+            TextField streetNameField = new TextField(customer.getStreetName());
+
+            Label streetNumberLabel = new Label("Street Number:");
+            TextField streetNumberField = new TextField(customer.getStreetNumber());
+
+            Label cityLabel = new Label("City:");
+            ObservableList<String> cities = FXCollections.observableArrayList(
+                    "Belgrade", "Novi Sad", "Nis", "Subotica", "Kragujevac", "Krusevac", "Cacak", "Vranje", "Zrenjanin"
+            );
+            ChoiceBox<String> cityChoiceBox = new ChoiceBox<>(cities);
+
+            Label phoneNumberLabel = new Label("Phone Number:");
+            TextField phoneNumberField = new TextField(customer.getPhoneNumber());
+
+            gridPane.addColumn(0, firstNameLabel, lastNameLabel, emailLabel, streetNameLabel, streetNumberLabel, cityLabel, phoneNumberLabel);
+            gridPane.addColumn(1, firstNameField, lastNameField, emailField, streetNameField, streetNumberField, cityChoiceBox, phoneNumberField);
+
+            Button saveButton = new Button("Save Changes");
+            saveButton.setDisable(true);
+
+            cityChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                saveButton.setDisable(newValue == null);
+            });
+
+            saveButton.setDisable(cityChoiceBox.getValue() == null);
+
+            center.getChildren().addAll(titleLabel, gridPane, saveButton);
+            center.setAlignment(Pos.CENTER);
+            center.setSpacing(10);
+
+            changeInfoPane.setCenter(center);
+
+            saveButton.setOnAction(actionEvent -> {
+                if (CustomerValidations.validateAllInfo(firstNameField.getText(),
+                        lastNameField.getText(),
+                        emailField.getText(),
+                        streetNameField.getText(),
+                        streetNumberField.getText(),
+                        phoneNumberField.getText())){
+
+                    DatabaseConnector.updateCustomerInfo(customer.getUsername(),
+                            firstNameField.getText(),
+                            lastNameField.getText(),
+                            emailField.getText(),
+                            streetNameField.getText(),
+                            streetNumberField.getText(),
+                            cityChoiceBox.getValue(),
+                            phoneNumberField.getText());
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Success");
+                    alert.setContentText("Information updated successfully!");
+                    alert.showAndWait();
+                    changeinfoStage.close();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setContentText("Invalid information.");
+                    alert.showAndWait();
+                }
+            });
+
+            Scene infoScene = new Scene(changeInfoPane, 400, 400);
+            changeinfoStage.setScene(infoScene);
+            changeinfoStage.show();
+            changeinfoStage.setTitle("Change information");
+            changeinfoStage.setResizable(false);
+        });
 
         return new Scene(root, 1600, 700);
     }
 
-    private void openCart(VBox placeholder) {
-        System.out.println("Opening cart...");
-        cartContents = new VBox();
-
-        // Prikazi listu proizvoda u korpi
-        cartListView = new ListView<>(cartItems);
-        cartListView.setCellFactory(param -> new CartItemCell());
-
-        if(!isCartShowed) {
-            cartContents.getChildren().add(cartListView);
-            isCartShowed = true;
+    private double calculateTotal() {
+        double total = 0;
+        for (CartItem cartItem : shoppingCart.getItems()) {
+            total += cartItem.getProduct().getPrice() * cartItem.getQuantity();
         }
-
-        // Inicijalizujte label za ukupnu cenu
-        totalLabel = new Label("Total: " + calculateTotal());
-        cartContents.getChildren().add(totalLabel);
-
-        // Postavite TranslateTransition
-        TranslateTransition showCart = new TranslateTransition(Duration.millis(500), cartContents);
-        showCart.setToY(-cartContents.getHeight());
-        showCart.setInterpolator(Interpolator.EASE_OUT);
-
-        // Prikazivanje korpe sa animacijom
-
-        isCartOpen = true;
-
-        // Dodajte cartContents na scenu ili na određeni kontejner
-        placeholder.getChildren().add(cartContents);
-        placeholder.setVisible(true);
-        showCart.play();
-        System.out.println("Cart opened successfully.");
+        return total;
     }
-
-    // Kreirajte prilagođeni prikaz za svaki element u ListView
-    private static class CartItemCell extends ListCell<CartItem> {
-        @Override
-        protected void updateItem(CartItem cartItem, boolean empty) {
-            super.updateItem(cartItem, empty);
-
-            if (empty || cartItem == null) {
-                setText(null);
-            } else {
-                // Prikazivanje podataka o proizvodu u korpi
-                Label label = new Label(cartItem.getProduct().getProductName() + " - Total: " + cartItem.getTotalPrice());
-
-                // Koristite TextField umesto Spinnnera
-                TextField quantityTextField = new TextField(String.valueOf(cartItem.getQuantity()));
-                quantityTextField.setMaxWidth(50);
-                quantityTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-                    try {
-                        int newQuantity = Integer.parseInt(newValue);
-                        updateQuantity(cartItem, newQuantity);
-                    } catch (NumberFormatException e) {
-                        // Ignorišite neispravan unos
-                    }
-                });
-
-                // Dodajte dugme Remove
-                Button removeButton = new Button("Remove");
-                removeButton.setOnAction(event -> removeFromCart(cartItem));
-
-                HBox hbox = new HBox(label, quantityTextField, removeButton);
-                setGraphic(hbox);
+    private void showCart(HBox right, VBox cartBox) {
+        right.getChildren().add(cartBox);
+        isCartVisible = true;
+    }
+    private void hideCart(HBox right) {
+        right.getChildren().remove(0);
+        isCartVisible = false;
+    }
+    private void filterProductList(ObservableList<Product> originalList, TableView<Product> tableView, String keyword) {
+        ObservableList<Product> filteredList = FXCollections.observableArrayList();
+        for (Product product : originalList) {
+            if (product.getProductId().toLowerCase().contains(keyword.toLowerCase()) ||
+                    product.getProductName().toLowerCase().contains(keyword.toLowerCase()) ||
+                    product.getProductType().toLowerCase().contains(keyword.toLowerCase()) ||
+                    product.getSupplier().toLowerCase().contains(keyword.toLowerCase()) ||
+                    (product.getPrice() == Double.parseDouble(keyword))) {
+                filteredList.add(product);
             }
         }
-    }
-
-    private void closeCart(VBox placeholder){
-        placeholder.getChildren().remove(0);
-        placeholder.setVisible(false);
-    }
-
-    private static double calculateTotal() {
-        return cartItems.stream().mapToDouble(CartItem::getTotalPrice).sum();
-    }
-
-    private void addToCart(Product product) {
-        System.out.println("Adding product to cart: " + product);
-
-        // Proverite da li je proizvod već dodat u korpu
-        Optional<CartItem> existingCartItem = cartItems.stream()
-                .filter(item -> item.getProduct().equals(product))
-                .findFirst();
-
-        if (existingCartItem.isPresent()) {
-            // Ako je proizvod već u korpi, povećajte količinu za 1
-            existingCartItem.get().increaseQuantity();
-        } else {
-            // Inače, dodajte novu stavku u korpu
-            cartItems.add(new CartItem(product, 1));
-        }
-
-        // Ažurirajte prikaz korpe
-        updateCartView();
-        System.out.println("Cart items after adding: " + cartItems);
-    }
-
-    private static void removeFromCart(CartItem cartItem) {
-        cartItems.remove(cartItem);
-
-        // Ažurirajte prikaz korpe
-        updateCartView();
-    }
-
-    private static void updateQuantity(CartItem cartItem, Integer newQuantity) {
-        cartItem.setQuantity(newQuantity);
-
-        // Ažurirajte prikaz korpe
-        updateCartView();
-
-        // Proverite da li postoji trenutni Spinner i postavite njegovu vrednost
-        if (currentSpinner != null) {
-            currentSpinner.getValueFactory().setValue(newQuantity);
-        }
-    }
-
-    private void toggleCart(VBox placeholder) {
-        if (isCartOpen) {
-            closeCart(placeholder);
-            isCartOpen = false;
-        } else {
-            openCart(placeholder);
-            isCartOpen = true;
-        }
-    }
-
-    // Metoda za ažuriranje prikaza korpe
-    private static void updateCartView() {
-        updateTotalLabel();
-        cartListView.refresh();
-    }
-
-    // Metoda za ažuriranje ListView u korpi
-    private static void updateCartListView(ListView<CartItem> cartListView) {
-        // Koristite getItems().setAll() umesto setItems()
-        cartListView.getItems().setAll(cartItems);
-        cartListView.refresh();
-    }
-
-
-    // Metoda za ažuriranje ukupne cene
-    private static void updateTotalLabel() {
-        totalLabel.setText("Total: " + calculateTotal());
-    }
-
-    // Filtering product list
-    private void filterProductList(ObservableList<Product> originalList, TableView<Product> tableView, String keyword) {
-        ObservableList<Product> filteredList = originalList.filtered(product ->
-                product.getProductId().toLowerCase().contains(keyword.toLowerCase()) ||
-                        product.getProductName().toLowerCase().contains(keyword.toLowerCase()) ||
-                        product.getProductType().toLowerCase().contains(keyword.toLowerCase()) ||
-                        product.getSupplier().toLowerCase().contains(keyword.toLowerCase()) ||
-                        (product.getPrice() == Double.parseDouble(keyword))
-        );
 
         tableView.setItems(filteredList);
     }

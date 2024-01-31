@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 
 import static DB.DatabaseConnector.connect;
 
@@ -22,12 +21,7 @@ public class Customer {
     private String phoneNumber;
 
     public Customer(String username, String firstName, String lastName, String email, String streetName, String streetNumber, String city, String phoneNumber) throws IllegalArgumentException {
-        if (CustomerValidations.validateEmail(email) &&
-                CustomerValidations.validateStreetName(streetName) &&
-                CustomerValidations.validateStreetNumber(streetNumber) &&
-                CustomerValidations.validatePhoneNumber(phoneNumber) &&
-                CustomerValidations.validateName(firstName) &&
-                CustomerValidations.validateName(lastName)) {
+        if (CustomerValidations.validateAllInfo(firstName, lastName, email, streetName, streetNumber, phoneNumber)){
             this.username = username;
             this.firstName = firstName;
             this.lastName = lastName;

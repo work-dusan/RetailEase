@@ -65,13 +65,14 @@ public class WarehouseEmployeeMainScene {
 
         TableColumn<Product, String> productIdColumn = new TableColumn<>("Product ID");
         productIdColumn.setCellValueFactory(new PropertyValueFactory<>("productId"));
+        productIdColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, Image> productImageColumn = new TableColumn<>("Image");
         productImageColumn.setCellFactory(param -> {
             //Set up the ImageView
             final ImageView imageview = new ImageView();
-            imageview.setFitHeight(50);
-            imageview.setFitWidth(70);
+            imageview.setFitHeight(100);
+            imageview.setFitWidth(100);
 
             //Set up the Table
             TableCell<Product, Image> cell = new TableCell<>() {
@@ -86,27 +87,35 @@ public class WarehouseEmployeeMainScene {
             return cell;
         });
         productImageColumn.setCellValueFactory(cell -> new SimpleObjectProperty<>(cell.getValue().getProductImage()));
+        productImageColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, String> productNameColumn = new TableColumn<>("Name");
         productNameColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
+        productNameColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, Double> productPriceColumn = new TableColumn<>("Price");
         productPriceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        productPriceColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, Integer> productQuantityColumn = new TableColumn<>("Quantity");
         productQuantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantityInStock"));
+        productQuantityColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, String> productTypeColumn = new TableColumn<>("Type");
         productTypeColumn.setCellValueFactory(new PropertyValueFactory<>("productType"));
+        productTypeColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, String> productDescriptionColumn = new TableColumn<>("Description");
         productDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+        productDescriptionColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, LocalDate> productExpirationDateColumn = new TableColumn<>("Expiration date");
         productExpirationDateColumn.setCellValueFactory(new PropertyValueFactory<>("expirationDate"));
+        productExpirationDateColumn.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Product, String> productSupplierColumn = new TableColumn<>("Supplier");
         productSupplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplier"));
+        productSupplierColumn.setStyle("-fx-alignment: CENTER;");
 
         productTableView.getColumns().addAll(productIdColumn, productImageColumn, productNameColumn, productPriceColumn, productQuantityColumn, productTypeColumn, productDescriptionColumn, productExpirationDateColumn, productSupplierColumn);
 
@@ -356,6 +365,8 @@ public class WarehouseEmployeeMainScene {
         );
 
         tableView.setItems(filteredList);
+        tableView.requestLayout();
+        tableView.refresh();
     }
 
     private void checkExpiration(ObservableList<Product> productList) {

@@ -60,7 +60,6 @@ public class CustomerRegistrationScene {
         // ChoiceBox za odabir grada
         ObservableList<String> cities = FXCollections.observableArrayList(
                 "Belgrade", "Novi Sad", "Nis", "Subotica", "Kragujevac", "Krusevac", "Cacak", "Vranje", "Zrenjanin"
-                // Dodajte ostale gradove prema potrebi
         );
         ChoiceBox<String> cityChoiceBox = new ChoiceBox<>(cities);
         GridPane.setConstraints(cityChoiceBox, 1, 5);

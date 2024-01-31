@@ -4,12 +4,8 @@ import DB.DatabaseConnector;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritablePixelFormat;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;

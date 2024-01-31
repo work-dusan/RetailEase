@@ -1,7 +1,7 @@
 package auth;
 
 import DB.DatabaseConnector;
-import encryptor.SHA256;  // Dodajte import za SHA256 klasu
+import encryptor.SHA256;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import main.CustomerMainScene;
@@ -32,10 +32,9 @@ public class Login {
                     String storedSalt = resultSet.getString("salt");
 
                     try {
-                        // Generišite heš za unetu lozinku i "salt"
+                        // Generate hash
                         String hashedPassword = SHA256.hashPassword(password, storedSalt);
 
-                        // Poredite dobijeni heš sa vrednošću u bazi podataka
                         if (hashedPassword.equals(storedPasswordHash)) {
                             String role = resultSet.getString("role");
                             showAlert("Login Successful", "Welcome, " + username + "!");
@@ -71,7 +70,6 @@ public class Login {
         }
     }
 
-    // Metoda za prikazivanje JavaFX Alert prozora
     private static void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);

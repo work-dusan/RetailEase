@@ -40,4 +40,18 @@ public class CustomerValidations {
         Matcher matcher = pattern.matcher(phoneNumber);
         return matcher.matches();
     }
+
+    public static boolean validateAllInfo(String firstName,
+                                          String lastName,
+                                          String email,
+                                          String streetName,
+                                          String streetNumber,
+                                          String phoneNumber){
+        return validateName(firstName) &&
+                validateName(lastName) &&
+                validateEmail(email) &&
+                validateStreetName(streetName) &&
+                validateStreetNumber(streetNumber) &&
+                validatePhoneNumber(phoneNumber);
+    }
 }

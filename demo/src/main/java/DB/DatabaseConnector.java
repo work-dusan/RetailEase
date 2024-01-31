@@ -284,4 +284,24 @@ public class DatabaseConnector {
         }
     }
 
+    public static void updateCustomerInfo(String username, String firstName, String lastName, String email, String streetName, String streetNumber, String city, String phoneNumber){
+        String updateQuery = "UPDATE customer SET first_name = ?, last_name = ?, email = ?, street_name = ?, street_number = ?, city = ?, phone_number = ? WHERE username = ?";
+        try (Connection connection = connect()){
+            assert connection != null;
+            try (PreparedStatement statement = connection.prepareStatement(updateQuery)){
+                statement.setString(1, firstName);
+                statement.setString(2, lastName);
+                statement.setString(3, email);
+                statement.setString(4, streetName);
+                statement.setString(5, streetNumber);
+                statement.setString(6, city);
+                statement.setString(7, phoneNumber);
+                statement.setString(8, username);
+
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
