@@ -17,6 +17,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import products.CartItem;
 import products.Product;
+import products.ProductCRUD;
 import products.ShoppingCart;
 import users.Customer;
 import validations.CustomerValidations;
@@ -370,6 +371,9 @@ public class CustomerMainScene {
             changeinfoStage.setTitle("Change information");
             changeinfoStage.setResizable(false);
         });
+        checkoutButton.setOnAction(event -> {
+            CheckoutScene.createCheckoutStage(shoppingCart, customer, calculateTotal());
+        });
 
         return new Scene(root, 1600, 700);
     }
@@ -390,18 +394,17 @@ public class CustomerMainScene {
         isCartVisible = false;
     }
     private void filterProductList(ObservableList<Product> originalList, TableView<Product> tableView, String keyword) {
-        ObservableList<Product> filteredList = FXCollections.observableArrayList();
-        for (Product product : originalList) {
-            if (product.getProductId().toLowerCase().contains(keyword.toLowerCase()) ||
-                    product.getProductName().toLowerCase().contains(keyword.toLowerCase()) ||
-                    product.getProductType().toLowerCase().contains(keyword.toLowerCase()) ||
-                    product.getSupplier().toLowerCase().contains(keyword.toLowerCase()) ||
-                    (product.getPrice() == Double.parseDouble(keyword))) {
-                filteredList.add(product);
-            }
-        }
+        ObservableList<Product> filteredList = originalList.filtered(product ->
+                product.getProductId().toLowerCase().contains(keyword.toLowerCase()) ||
+                        product.getProductName().toLowerCase().contains(keyword.toLowerCase()) ||
+                        product.getProductType().toLowerCase().contains(keyword.toLowerCase()) ||
+                        product.getSupplier().toLowerCase().contains(keyword.toLowerCase()) ||
+                        String.valueOf(((int) product.getPrice())).equals(keyword) ||
+                        String.valueOf((product.getPrice())).equals(keyword)
+        );
 
         tableView.setItems(filteredList);
+        tableView.requestLayout();
+        tableView.refresh();
     }
-
 }

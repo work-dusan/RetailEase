@@ -3,6 +3,9 @@ module com.example.demo {
     requires javafx.fxml;
     requires java.sql;
     requires mysql.connector.j;
+    requires org.apache.httpcomponents.httpcore;
+    requires org.apache.httpcomponents.httpclient;
+    requires org.json;
 
 
     opens main to javafx.fxml;

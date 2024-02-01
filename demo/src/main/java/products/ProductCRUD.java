@@ -133,4 +133,26 @@ public class ProductCRUD {
         return null;
     }
 
+    public static void updateProductQuantity(String productId, int newQuantity) {
+        try {
+            Connection connection = connect();
+            String updateQuery = "UPDATE product SET quantity = ? WHERE product_id = ?";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+                preparedStatement.setInt(1, newQuantity);
+                preparedStatement.setString(2, productId);
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    System.out.println("Product quantity updated successfully.");
+                } else {
+                    System.out.println("Failed to update product quantity.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Dodajte odgovarajući tretman izuzetaka i prikazivanje poruka o grešci
+        }
+    }
 }
