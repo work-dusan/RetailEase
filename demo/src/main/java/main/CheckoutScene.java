@@ -1,6 +1,7 @@
 package main;
 
-import DB.DatabaseConnector;
+import delivery.DeliveryOrder;
+import delivery.DeliveryOrderDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -31,7 +32,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +47,10 @@ public class CheckoutScene {
         addressTextField.setPromptText("Type an address...");
 
         ContextMenu contextMenu = new ContextMenu();
+
+        Label apartmentNumberlabel = new Label("Apartment number:");
+        TextField apartmentNumberTextField = new TextField();
+        apartmentNumberTextField.setPromptText("Your apartment number...");
 
         Label paymentInfoLabel = new Label("Payment info:");
         RadioButton cashRadioButton = new RadioButton("Cash on delivery");
@@ -82,7 +86,7 @@ public class CheckoutScene {
 
         Button confirmPaymentButton = new Button("Confirm Payment");
 
-        VBox root = new VBox(addressLabel, addressTextField, paymentInfoLabel, cashRadioButton, cardRadioButton, cardInfoBox, deliveryTimeLabel, deliveryTimeComboBox, requestLabel, specialOrderTextArea, confirmPaymentButton);
+        VBox root = new VBox(addressLabel, addressTextField, apartmentNumberlabel, apartmentNumberTextField, paymentInfoLabel, cashRadioButton, cardRadioButton, cardInfoBox, deliveryTimeLabel, deliveryTimeComboBox, requestLabel, specialOrderTextArea, confirmPaymentButton);
         root.setAlignment(Pos.CENTER);
         
         cashRadioButton.setOnAction(event -> {
@@ -122,14 +126,15 @@ public class CheckoutScene {
 
                     // Update quantity in stock
                     if (reduceProductQuantityInWarehouse(cartItem)) {
-                        // add product to transaction
                         TransactionItemDAO.addTransactionItems(transactionId, cartItem);
                     } else {
-                        // Error = transaction delete
                         System.out.println("Insufficient quantity in the warehouse.");
                         return;
                     }
                 }
+
+                DeliveryOrder deliveryOrder = new DeliveryOrder(addressTextField.getText(), apartmentNumberTextField.getText(), deliveryTimeComboBox.getValue(), specialOrderTextArea.getText(),"To be delivered", transactionId);
+                DeliveryOrderDAO.addDelivery(deliveryOrder);
 
                 checkoutStage.close();
 
@@ -147,11 +152,11 @@ public class CheckoutScene {
     }
 
     private static List<String> getAutoCompleteResults(String input) throws IOException {
-        // OSM Nominatim servis za pretragu adresa
+
         String apiUrl = "https://nominatim.openstreetmap.org/search";
         String formatParam = "format=json";
         String addressDetailsParam = "addressdetails=1";
-        String limitParam = "limit=5"; // Možete prilagoditi broj rezultata
+        String limitParam = "limit=5";
 
         String query = URLEncoder.encode(input, "UTF-8");
 
@@ -185,7 +190,6 @@ public class CheckoutScene {
 
         return addresses;
     }
-
     private static void showAutoCompleteResults(ContextMenu contextMenu, List<String> results, TextField textField) {
         contextMenu.getItems().clear();
 
