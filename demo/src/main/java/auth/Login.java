@@ -5,8 +5,10 @@ import encryptor.SHA256;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import main.CustomerMainScene;
+import main.DeliveryDriverMainScene;
 import main.WarehouseEmployeeMainScene;
 import users.Customer;
+import users.DeliveryDriver;
 import users.WarehouseEmployee;
 
 import java.security.NoSuchAlgorithmException;
@@ -50,6 +52,12 @@ public class Login {
                                 primaryStage.setScene(mainScene.createCustomerMainScene(primaryStage, loggedInCustomer));
                                 primaryStage.setResizable(false);
                                 primaryStage.setTitle("Customer");
+                            } else if (role.equals("Driver")){
+                                DeliveryDriver loggedInDriver = DeliveryDriver.findDriver(username);
+                                DeliveryDriverMainScene mainScene = new DeliveryDriverMainScene();
+                                primaryStage.setScene(mainScene.createDeliveryDriverMainScene(primaryStage, loggedInDriver));
+                                primaryStage.setTitle("Delivery Driver");
+
                             }
                         } else {
                             showAlert("Login Failed", "Invalid username or password.");
@@ -71,10 +79,15 @@ public class Login {
     }
 
     private static void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        try {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(content);
+            alert.showAndWait();
+        } catch (NoSuchFieldError e) {
+            e.printStackTrace();
+            System.err.println("Exception while showing alert. Title: " + title + ", Content: " + content);
+        }
     }
 }

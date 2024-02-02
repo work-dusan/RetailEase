@@ -136,7 +136,13 @@ public class WarehouseEmployeeMainScene {
         });
 
         searchTextField.textProperty().addListener((observable, oldValue, newValue) ->
-                filterProductList(productList, productTableView, newValue)
+                {
+                    ObservableList<Product> filteredList = filterProductList(productList, productTableView, newValue);
+
+                    productTableView.setItems(filteredList);
+                    productTableView.requestLayout();
+                    productTableView.refresh();
+                }
         );
 
         // CENTER - END
@@ -356,7 +362,7 @@ public class WarehouseEmployeeMainScene {
                 ProductValidation.validateSupplier(supplier);
     }
 
-    private void filterProductList(ObservableList<Product> originalList, TableView<Product> tableView, String keyword) {
+    public ObservableList<Product> filterProductList(ObservableList<Product> originalList, TableView<Product> tableView, String keyword) {
         ObservableList<Product> filteredList = originalList.filtered(product ->
                 product.getProductId().toLowerCase().contains(keyword.toLowerCase()) ||
                         product.getProductName().toLowerCase().contains(keyword.toLowerCase()) ||
@@ -364,9 +370,7 @@ public class WarehouseEmployeeMainScene {
                         product.getSupplier().toLowerCase().contains(keyword.toLowerCase())
         );
 
-        tableView.setItems(filteredList);
-        tableView.requestLayout();
-        tableView.refresh();
+        return filteredList;
     }
 
     private void checkExpiration(ObservableList<Product> productList) {

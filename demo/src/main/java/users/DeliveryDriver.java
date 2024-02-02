@@ -2,7 +2,13 @@ package users;
 
 import validations.DeliveryDriverValidations;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+
+import static DB.DatabaseConnector.connect;
 
 public class DeliveryDriver {
     private String username;
@@ -160,6 +166,36 @@ public class DeliveryDriver {
             throw new IllegalArgumentException("Invalid vehicle info");
         }
     }
+
+    public static DeliveryDriver findDriver(String username) {
+        try (Connection connection = connect();
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM driver WHERE username = ?")) {
+            statement.setString(1, username);
+
+            ResultSet resultSet = statement.executeQuery();
+            DeliveryDriver employee = null;
+
+            while (resultSet.next()){
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                LocalDate dateOfBirth = resultSet.getDate("date_of_birth").toLocalDate();
+                String jmbg = resultSet.getString("jmbg");
+                String address = resultSet.getString("address");
+                String phoneNumber = resultSet.getString("phone_number");
+                LocalDate employmentDate = resultSet.getDate("employment_date").toLocalDate();
+                String licenceNumber = resultSet.getString("license_number");
+                String vehicleInfo = resultSet.getString("vehicle_info");
+
+                employee = new DeliveryDriver(username, firstName, lastName, jmbg, dateOfBirth, address, phoneNumber, employmentDate, licenceNumber, vehicleInfo);
+
+            }
+            return employee;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     @Override
     public String toString() {

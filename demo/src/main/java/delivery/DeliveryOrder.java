@@ -1,6 +1,6 @@
 package delivery;
 
-public class DeliveryOrder {
+public class    DeliveryOrder {
 
     private String deliveryAddress;
     private String apartmentNumber;
