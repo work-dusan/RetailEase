@@ -70,8 +70,6 @@ public class DeliveryDriverMainScene {
             double deliveryLatitude = 43.3210;
             double deliveryLongitude = 21.8946;
 
-            showWebView("https://www.google.com/maps/@43.3292659,21.8262318,15z?entry=ttu");
-
             if (event.getClickCount() == 2) {
                 DeliveryOrder selectedOrder = deliveries.getSelectionModel().getSelectedItem();
                 if (selectedOrder != null) {
@@ -98,17 +96,18 @@ public class DeliveryDriverMainScene {
                         double destinationLongitude = Double.parseDouble(firstResult.get("lon").toString());
 
                         // Formiranje URL-a za dobijanje informacija o putanji od dostavljača do odredišta
-//                        directionsUrl = "https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route="
-//                                + deliveryLatitude + "%2C" + deliveryLongitude + "%3B"
-//                                + destinationLatitude + "%2C" + destinationLongitude
-//                                + "#map=14/" + ((deliveryLatitude + destinationLatitude) / 2) + "/" + ((deliveryLongitude + destinationLongitude) / 2);
+                        directionsUrl = "https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route="
+                                + deliveryLatitude + "%2C" + deliveryLongitude + "%3B"
+                                + destinationLatitude + "%2C" + destinationLongitude
+                                + "#map=14/" + ((deliveryLatitude + destinationLatitude) / 2) + "/" + ((deliveryLongitude + destinationLongitude) / 2);
 
 
+                        directionsUrl = "https://www.google.com/maps/dir/43.3072046,21.9473063/" + destinationAddress;
                     } else {
                         System.out.println("Nije pronađena geografska lokacija za adresu: " + destinationAddress);
                     }
 
-
+                    showWebView(directionsUrl);
                 }
             }
 
