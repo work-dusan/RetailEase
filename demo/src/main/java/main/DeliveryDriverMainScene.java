@@ -2,7 +2,11 @@ package main;
 
 import delivery.DeliveryOrder;
 import delivery.DeliveryOrderDAO;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -10,27 +14,23 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import users.DeliveryDriver;
-
-import java.awt.*;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.net.URLEncoder;
 
 
 public class DeliveryDriverMainScene {
     public Scene createDeliveryDriverMainScene(Stage primaryStage, DeliveryDriver loggedInDriver) throws SQLException {
 
         BorderPane root = new BorderPane();
+
+        // TOP - START
+
+        Label welcomeLabel = new Label("Welcome " + loggedInDriver.getFirstName());
+        welcomeLabel.setPadding(new Insets(20));
+
+        root.setTop(welcomeLabel);
+
+        // TOP - END
 
         // CENTER - START
 
@@ -64,70 +64,58 @@ public class DeliveryDriverMainScene {
 
         // CENTER - END
 
+        // BOTTOM - START
+
+        Button logoutButton = new Button("Logout");
+        logoutButton.setPadding(new Insets(20));
+
+        root.setBottom(logoutButton);
+        BorderPane.setAlignment(logoutButton, Pos.CENTER);
+
+        // BOTTOM - END
+
         // EVENTS
 
         deliveries.setOnMouseClicked(event -> {
-            double deliveryLatitude = 43.3210;
-            double deliveryLongitude = 21.8946;
 
             if (event.getClickCount() == 2) {
                 DeliveryOrder selectedOrder = deliveries.getSelectionModel().getSelectedItem();
                 if (selectedOrder != null) {
+
+                    Stage webViewStage = new Stage();
+                    WebView webView = new WebView();
+                    WebEngine webEngine = webView.getEngine();
+                    BorderPane mapPane = new BorderPane();
+
                     String destinationAddress = selectedOrder.getDeliveryAddress();
+                    String directionsUrl = "https://www.google.com/maps/dir/43.3072046,21.9473063/" + destinationAddress;
+                    webEngine.load(directionsUrl);
 
-                    // Kodiranje adrese kako bi se izbegli specijalni karakteri
-                    String encodedAddress;
-                    encodedAddress = URLEncoder.encode(destinationAddress, StandardCharsets.UTF_8);
+                    Button confirmDelivery = new Button("Confirm delivery");
+                    confirmDelivery.setPadding(new Insets(20));
 
-                    // Koristi OSM Nominatim API za geokodiranje adrese i dobijanje geografskih koordinata
-                    String geocodingUrl = "https://nominatim.openstreetmap.org/search?format=json&q=" + encodedAddress;
-                    JSONParser parser = new JSONParser();
-                    JSONArray results;
-                    try {
-                        results = (JSONArray) parser.parse(new InputStreamReader(new URL(geocodingUrl).openStream()));
-                    } catch (IOException | ParseException e) {
-                        throw new RuntimeException(e);
-                    }
+                    mapPane.setCenter(webView);
+                    mapPane.setBottom(confirmDelivery);
+                    BorderPane.setAlignment(confirmDelivery, Pos.CENTER);
 
-                    String directionsUrl = null;
-                    if (!results.isEmpty()) {
-                        JSONObject firstResult = (JSONObject) results.get(0);
-                        double destinationLatitude = Double.parseDouble(firstResult.get("lat").toString());
-                        double destinationLongitude = Double.parseDouble(firstResult.get("lon").toString());
-
-                        // Formiranje URL-a za dobijanje informacija o putanji od dostavljača do odredišta
-                        directionsUrl = "https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route="
-                                + deliveryLatitude + "%2C" + deliveryLongitude + "%3B"
-                                + destinationLatitude + "%2C" + destinationLongitude
-                                + "#map=14/" + ((deliveryLatitude + destinationLatitude) / 2) + "/" + ((deliveryLongitude + destinationLongitude) / 2);
-
-
-                        directionsUrl = "https://www.google.com/maps/dir/43.3072046,21.9473063/" + destinationAddress;
-                    } else {
-                        System.out.println("Nije pronađena geografska lokacija za adresu: " + destinationAddress);
-                    }
-
-                    showWebView(directionsUrl);
+                    Scene webViewScene = new Scene(mapPane, 1000, 800);
+                    webViewStage.setScene(webViewScene);
+                    webViewStage.setTitle("Delivery Address");
+                    webViewStage.show();
                 }
+
             }
 
+
+
+
+        });
+        logoutButton.setOnAction(event -> {
+            LoginScene scene = new LoginScene();
+            primaryStage.setScene(scene.createLoginScene(primaryStage));
         });
 
         return new Scene(root, 1000, 600);
     }
 
-    private static void showWebView(String url) {
-        Stage webViewStage = new Stage();
-        WebView webView = new WebView();
-        WebEngine webEngine = webView.getEngine();
-        webEngine.load(url);
-
-        BorderPane root = new BorderPane();
-        root.setCenter(webView);
-
-        Scene webViewScene = new Scene(root, 800, 600);
-        webViewStage.setScene(webViewScene);
-        webViewStage.setTitle("Web View");
-        webViewStage.show();
-    }
 }
