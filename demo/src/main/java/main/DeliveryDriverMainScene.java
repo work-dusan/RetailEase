@@ -78,37 +78,42 @@ public class DeliveryDriverMainScene {
             if (event.getClickCount() == 2) {
                 DeliveryOrder selectedOrder = deliveries.getSelectionModel().getSelectedItem();
                 if (selectedOrder != null) {
-                    Stage webViewStage = new Stage();
-                    WebView webView = new WebView();
-                    WebEngine webEngine = webView.getEngine();
-                    BorderPane mapPane = new BorderPane();
+                    try{
+                        Stage webViewStage = new Stage();
+                        WebView webView = new WebView();
+                        WebEngine webEngine = webView.getEngine();
+                        BorderPane mapPane = new BorderPane();
 
-                    String destinationAddress = selectedOrder.getDeliveryAddress();
-                    String directionsUrl = "https://www.google.com/maps/dir/43.3072046,21.9473063/" + destinationAddress;
-                    webEngine.load(directionsUrl);
+                        String destinationAddress = selectedOrder.getDeliveryAddress();
+                        String directionsUrl = "https://www.google.com/maps/dir/43.3072046,21.9473063/" + destinationAddress;
+                        webEngine.load(directionsUrl);
 
-                    Button confirmDelivery = new Button("Confirm delivery");
-                    confirmDelivery.setPadding(new Insets(20));
+                        Button confirmDelivery = new Button("Confirm delivery");
+                        confirmDelivery.setPadding(new Insets(20));
 
-                    HBox buttonBox = new HBox(confirmDelivery);
-                    buttonBox.setAlignment(Pos.CENTER);
+                        HBox buttonBox = new HBox(confirmDelivery);
+                        buttonBox.setAlignment(Pos.CENTER);
 
-                    mapPane.setCenter(webView);
-                    mapPane.setBottom(buttonBox);
-                    BorderPane.setAlignment(buttonBox, Pos.CENTER);
+                        mapPane.setCenter(webView);
+                        mapPane.setBottom(buttonBox);
+                        BorderPane.setAlignment(buttonBox, Pos.CENTER);
 
-                    Scene webViewScene = new Scene(mapPane, 1000, 800);
-                    webViewStage.setScene(webViewScene);
-                    webViewStage.setTitle("Delivery Address");
-                    webViewStage.show();
+                        Scene webViewScene = new Scene(mapPane, 1000, 800);
+                        webViewStage.setScene(webViewScene);
+                        webViewStage.setTitle("Delivery Address");
+                        webViewStage.show();
+                        webViewStage.setFullScreen(true);
 
-                    confirmDelivery.setOnAction(actionEvent -> {
-                        try {
+                        confirmDelivery.setOnMouseClicked(actionEvent -> {
                             DeliveryOrderDAO.updateDeliveryOrder(selectedOrder.getTransactionId(), loggedInDriver.getUsername(), "Delivered");
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    });
+
+                            deliveries.getItems().remove(selectedOrder);
+                            deliveries.refresh();
+                            webViewStage.close();
+                        });
+                    } catch (NullPointerException e){
+                        e.printStackTrace();
+                    }
                 }
             }
         });
