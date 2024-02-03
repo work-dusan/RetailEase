@@ -4,10 +4,8 @@ import DB.DatabaseConnector;
 import products.CartItem;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 
 public class TransactionItemDAO {
 

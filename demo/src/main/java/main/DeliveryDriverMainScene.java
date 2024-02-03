@@ -5,20 +5,18 @@ import delivery.DeliveryOrderDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import users.DeliveryDriver;
 import java.sql.SQLException;
 
-
 public class DeliveryDriverMainScene {
+
     public Scene createDeliveryDriverMainScene(Stage primaryStage, DeliveryDriver loggedInDriver) throws SQLException {
 
         BorderPane root = new BorderPane();
@@ -77,11 +75,9 @@ public class DeliveryDriverMainScene {
         // EVENTS
 
         deliveries.setOnMouseClicked(event -> {
-
             if (event.getClickCount() == 2) {
                 DeliveryOrder selectedOrder = deliveries.getSelectionModel().getSelectedItem();
                 if (selectedOrder != null) {
-
                     Stage webViewStage = new Stage();
                     WebView webView = new WebView();
                     WebEngine webEngine = webView.getEngine();
@@ -94,22 +90,29 @@ public class DeliveryDriverMainScene {
                     Button confirmDelivery = new Button("Confirm delivery");
                     confirmDelivery.setPadding(new Insets(20));
 
+                    HBox buttonBox = new HBox(confirmDelivery);
+                    buttonBox.setAlignment(Pos.CENTER);
+
                     mapPane.setCenter(webView);
-                    mapPane.setBottom(confirmDelivery);
-                    BorderPane.setAlignment(confirmDelivery, Pos.CENTER);
+                    mapPane.setBottom(buttonBox);
+                    BorderPane.setAlignment(buttonBox, Pos.CENTER);
 
                     Scene webViewScene = new Scene(mapPane, 1000, 800);
                     webViewStage.setScene(webViewScene);
                     webViewStage.setTitle("Delivery Address");
                     webViewStage.show();
+
+                    confirmDelivery.setOnAction(actionEvent -> {
+                        try {
+                            DeliveryOrderDAO.updateDeliveryOrder(selectedOrder.getTransactionId(), loggedInDriver.getUsername(), "Delivered");
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
-
             }
-
-
-
-
         });
+
         logoutButton.setOnAction(event -> {
             LoginScene scene = new LoginScene();
             primaryStage.setScene(scene.createLoginScene(primaryStage));

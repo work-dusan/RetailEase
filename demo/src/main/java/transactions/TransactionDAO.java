@@ -2,6 +2,7 @@ package transactions;
 
 import DB.DatabaseConnector;
 
+import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 
 public class TransactionDAO {
@@ -26,5 +27,28 @@ public class TransactionDAO {
         }
 
         return -1; // Transaction failed
+    }
+
+    public static String getCustomer(int transactionId){
+        String sql = "SELECT username FROM transactions WHERE transaction_id = ?";
+        String customerUsername = null;
+
+        try (Connection connection = DatabaseConnector.connect()) {
+            assert connection != null;
+            try (PreparedStatement statement = connection.prepareStatement(sql)){
+
+                statement.setInt(1, transactionId);
+
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()){
+                    customerUsername = resultSet.getString("username");
+                }
+
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return customerUsername;
     }
 }

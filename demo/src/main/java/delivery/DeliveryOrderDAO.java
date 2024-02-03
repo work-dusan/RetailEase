@@ -59,4 +59,18 @@ public class DeliveryOrderDAO {
 
         return FXCollections.observableArrayList(orderList);
     }
+
+    public static void updateDeliveryOrder(int transactionId, String driver, String status) throws SQLException {
+        try (Connection connection = DatabaseConnector.connect()){
+
+            String sql = "UPDATE delivery_order SET status = ?, delivery_driver = ? WHERE transaction_id = ?";
+
+            assert connection != null;
+            try (PreparedStatement statement = connection.prepareStatement(sql)){
+                statement.setString(1,status);
+                statement.setString(2, driver);
+                statement.setInt(3, transactionId);
+            }
+        }
+    }
 }

@@ -9,6 +9,12 @@ module com.example.demo {
     requires java.desktop;
     requires javafx.web;
     requires json.simple;
+    requires org.jsoup;
+    requires selenium.java;
+    requires jcommander;
+    requires async.http.client;
+    requires selenium.api;
+    requires selenium.chrome.driver;
 
     opens main to javafx.fxml;
     opens products to javafx.base;
